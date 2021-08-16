@@ -1,5 +1,5 @@
 # TUSK
-# Titan Unix Student Kit
+# Titan Unix/Linux Starter Kit
 
 A meta-package which includes all you need to get started with computer science courses and a command line utility which will provide some utility functions specific to CSUF computer science courses.
 
