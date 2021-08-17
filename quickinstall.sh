@@ -97,13 +97,15 @@ echo "Testing your network connection."
 test_dns_web
 echo "You will be downloading and installing approximately 300 MB of software. This may take some time depending on the speed of your network and the speed of your computer."
 echo "Do not shutdown or put your computer to sleep until you see your prompt again."
-echo -n "Are you ready to continue? [y/n]"
-read answer
-if [ "${answer}" != "${answer#[Yy]}" -o "${TUSK_NO_PROMPT}x" != "x" ]; then
-    echo "Here we go!"
-else
-    echo "No sweat, you can always run this program later. Exiting."
-    exit 0
+if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
+    echo -n "Are you ready to continue? [y/n]"
+    read answer
+    if [ "${answer}" != "${answer#[Yy]}" ]; then
+        echo "Here we go!"
+    else
+        echo "No sweat, you can always run this program later. Exiting."
+        exit 0
+    fi
 fi
 
 # Update

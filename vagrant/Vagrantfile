@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     # If you have a local mirror, use the URL here
     TUSK_APT_SOURCES_HOSTURL="http://192.168.1.64/ubuntu"; export TUSK_APT_SOURCES_HOSTURL
-    TUST_NO_PROMPT="YES"; export TUSK_NO_PROMPT
+    TUSK_NO_PROMPT="YES"; export TUSK_NO_PROMPT
     # If you'd like the change to be permanent, say YES
     #TUSK_APT_SOURCES_HOST_PERMANENT="YES"; export TUSK_APT_SOURCES_HOST_PERMANENT
     bash /tusk/quickinstall.sh

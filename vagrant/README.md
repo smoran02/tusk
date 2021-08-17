@@ -1,5 +1,5 @@
 # Vagrant VM
-This is the *right* way to run a Tuffix virtual machine (VM) on your computer. The ideal use case is that the VM is run headless which means there is not a graphical user interface with windows and a mouse pointer. Files are shared between the host and the VM using the host's file system. To get work done, one uses all the typical Windows or Mac tools that one is used to. It is a lightweight way to have access to the Linux tools you need to get your class work completed.
+This is the *right* way to run a virtual machine (VM) on your computer. The ideal use case is that the VM is run headless which means there is not a graphical user interface with windows and a mouse pointer. Files are shared between the host and the VM using the host's file system. To get work done, one uses all the typical Windows or Mac tools that one is used to. It is a lightweight way to have access to the Linux tools you need to get your class work completed.
 
 A short video that demonstrates basic use of this VM on a macOS host computer is online at https://youtu.be/xO3eSnkwk74.
 
@@ -16,12 +16,18 @@ Apple computers with macOS 10.13 or later will encounter problems installing Vir
 
 All the `vagrant` commands assume that you are in the same directory as the `Vagantfile` provided in this directory.
 
+If you encounter problems mounting the host's filesystem in the guest, then you should use the guest additions vagrant plugin.
+
+```
+vagrant plugin install vagrant-vbguest
+```
+
 ## Headless VM - Default
 
 ### Starting the VM for the First Time
 In this directory there is a file named `Vagrantfile`. If you have cloned this repository to your computer, navigate to this directory using a terminal program.
 
-To start the VM and provision it with the Tuffix software run `vagrant up --provision`. This process may take 10-40 minutes.
+To start the VM and provision it with the TUSK software run `vagrant up --provision`. This process may take 10-40 minutes.
 
 ### Logging into the VM
 The VM is headless and does not have a graphical user interface.
@@ -37,11 +43,11 @@ A Graphical User Interface (GUI) is the sort of user interface you have when you
 ### Starting the VM for the First Time
 In this directory there is a file named `Vagrantfile`. If you have cloned this repository to your computer, navigate to this directory using a terminal program.
 
-To start the VM and provision it with the Tuffix software run `export VAGRANTGUI="YES" && vagrant up --provision`. This process may take 10-40 minutes.
+To start the VM and provision it with the TUSK software run `export VAGRANTGUI="YES" && vagrant up --provision`. This process may take 10-40 minutes.
 
 It will start up the VirtualBox hypervisor and start the desktop GUI.
 
-You can resize the size of the virtual screen by using the _Settings_ application from within Tuffix. Select the Display tab and change the resolution of the display.
+You can resize the size of the virtual screen by using the _Settings_ application from within Linux. Select the Display tab and change the resolution of the display.
 
 ### Logging into the VM
 
