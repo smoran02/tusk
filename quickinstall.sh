@@ -5,9 +5,6 @@
 # Tested on Ubuntu 20.04.2 LTS
 #
 # Env. Variables
-# TUSK_NO_PROMPT
-#   Set this to "YES" to skip over the initial warning and prompt.
-#   The default value is nil.
 # TUSK_APT_SOURCES_HOSTURL
 #   The URL used for apt.
 #   The default value is http://us.archive.ubuntu.com/ubuntu/
@@ -190,14 +187,6 @@ build_install_gtest_libs () {
     cd ${PWD}
 }
 
-prompt_sleep () {
-    SLEEP_TIME=${1:-"3"}
-    if [ "${TUSK_NO_PROMPT}X" = "YESX" ]; then
-        echo
-        sleep ${SLEEP_TIME}
-    fi
-}
-
 #####
 # Main
 #####
@@ -224,31 +213,12 @@ sudo_check
 
 echo "Testing your network connection."
 test_dns_web
-prompt_sleep
 
 echo "You will be downloading and installing approximately 300 MB of software. This may take some time depending on the speed of your network and the speed of your computer."
 echo "Do not shutdown or put your computer to sleep until you see your prompt again."
-prompt_sleep
-
-if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
-    echo -n "Are you ready to continue? [y/n]"
-    #read -p "y/n> " ANSWER
-    OLD_STTY=`stty -g`
-    stty raw -echo
-    ANSWER=$(head -c 1)
-    stty ${OLD_STTY}
-    if [ "${ANSWER}" != "${ANSWER#[Yy]}" ]; then
-        echo "Here we go!"
-    else
-        echo "You said ${ANSWER}."
-        echo "No sweat, you can always run this program later. Exiting."
-        exit 0
-    fi
-fi
 
 sudo_warning "Checking DMI table for system product name"
 test_if_virtualbox
-prompt_sleep
 
 # Update Apt Archives
 
