@@ -21,6 +21,14 @@
 # TUSK_INSTALL_SLACK
 #   Set to "YES" to install Slack.
 #   The default value is nil.
+# TUSK_INSTALL_VIRTUALBOX
+#   Set to "YES" to install VirtualBox. Cannot be installed on
+#   a VM host.
+#   The default value is nil.
+# TUSK_INSTALL_VAGRANT
+#   Set to "YES" to install Vagrant. TUSK_INSTALL_VIRTUALBOX must 
+#   also be set to "YES".
+#   The default value is nil.
 # TUSK_IS_VB
 #   This variable is set by the script after using dmidecode to
 #   determine if the host is a VirtualBox VM or not. It doesn't
@@ -358,47 +366,51 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ "${TUSK_IS_VB}X" != "YESX" ]; then
-    dpkg-query -W -f='${Package} ${Status} ${Version}\n' virtualbox-6.1 > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        # Virtualbox
-        sudo_warning "Adding VirtualBox GPG key"
-        wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+    if [ "${TUSK_INSTALL_VIRTUALBOX}X" = "YESX" ]; then
+        dpkg-query -W -f='${Package} ${Status} ${Version}\n' virtualbox-6.1 > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo "Error adding first VirtualBox GPG key. Exiting."
-            exit 1
+            # Virtualbox
+            sudo_warning "Adding VirtualBox GPG key"
+            wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+            if [ $? -ne 0 ]; then
+                echo "Error adding first VirtualBox GPG key. Exiting."
+                exit 1
+            fi
+            wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+            if [ $? -ne 0 ]; then
+                echo "Error adding second VirtualBox GPG key. Exiting."
+                exit 1
+            fi
+            sudo_warning "Adding VirtualBox apt source"
+            sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
+            if [ $? -ne 0 ]; then
+                echo "Error adding adding VirtualBox repository. Exiting."
+                exit 1
+            fi
+            PENDING_PACKAGES="virtualbox-6.1 ${PENDING_PACKAGES}"
         fi
-        wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-        if [ $? -ne 0 ]; then
-            echo "Error adding second VirtualBox GPG key. Exiting."
-            exit 1
-        fi
-        sudo_warning "Adding VirtualBox apt source"
-        sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
-        if [ $? -ne 0 ]; then
-            echo "Error adding adding VirtualBox repository. Exiting."
-            exit 1
-        fi
-        PENDING_PACKAGES="virtualbox-6.1 ${PENDING_PACKAGES}"
     fi
 
-    dpkg-query -W -f='${Package} ${Status} ${Version}\n' vagrant > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        # Vagrant
-        sudo_warning "Adding Vagrant GPG key"
-        wget -q https://apt.releases.hashicorp.com/gpg -O- | sudo apt-key add -
+    if [ "${TUSK_INSTALL_VAGRANT}X" = "YESX" -a \
+        "${TUSK_INSTALL_VIRTUALBOX}X" = "YESX" ]; then
+        dpkg-query -W -f='${Package} ${Status} ${Version}\n' vagrant > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo "Error adding Vagrant GPG key. Exiting."
-            exit 1
+            # Vagrant
+            sudo_warning "Adding Vagrant GPG key"
+            wget -q https://apt.releases.hashicorp.com/gpg -O- | sudo apt-key add -
+            if [ $? -ne 0 ]; then
+                echo "Error adding Vagrant GPG key. Exiting."
+                exit 1
+            fi
+            sudo_warning "Adding Vagrant repository"
+            sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+            if [ $? -ne 0 ]; then
+                echo "Error adding adding Vagrant repository. Exiting."
+                exit 1
+            fi
+            PENDING_PACKAGES="vagrant ${PENDING_PACKAGES}"
         fi
-        sudo_warning "Adding Vagrant repository"
-        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-        if [ $? -ne 0 ]; then
-            echo "Error adding adding Vagrant repository. Exiting."
-            exit 1
-        fi
-        PENDING_PACKAGES="vagrant ${PENDING_PACKAGES}"
     fi
-
 fi
 
 sudo_warning "Installing ${PENDING_PACKAGES}"
