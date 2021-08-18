@@ -11,10 +11,12 @@ sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtua
 
 
 Discord
+Debian package
 https://discord.com/api/download?platform=linux&format=deb
 
 Slack
 only snap and rpm
+can use `alien` to convert to deb
 snap install slack
 
 Docker
