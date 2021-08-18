@@ -190,7 +190,13 @@ build_install_gtest_libs () {
     cd ${PWD}
 }
 
-
+prompt_sleep () {
+    SLEEP_TIME=${1:-"3"}
+    if [ "${TUSK_NO_PROMPT}X" -eq "YESX" ]; then
+        echo
+        sleep ${SLEEP_TIME}
+    fi
+}
 
 #####
 # Main
@@ -199,7 +205,7 @@ build_install_gtest_libs () {
 # Check arch, if not x86_64 then stop
 ARCH=`arch`
 if [ ${ARCH} != "x86_64" ]; then
-    echo "Sorry this is only for AMD64 and X86_64 architectures."
+    echo "Sorry this is only for AMD64 and x86_64 architectures."
     echo "Your architecture is ${ARCH}."
     echo "Exiting."
     exit 1
@@ -218,12 +224,19 @@ sudo_check
 
 echo "Testing your network connection."
 test_dns_web
+prompt_sleep
+
 echo "You will be downloading and installing approximately 300 MB of software. This may take some time depending on the speed of your network and the speed of your computer."
 echo "Do not shutdown or put your computer to sleep until you see your prompt again."
+prompt_sleep
 
 if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
-    echo "Are you ready to continue?"
-    read -t 20 -N 1 -p "y/n> " ANSWER
+    echo -n "Are you ready to continue? [y/n]"
+    #read -p "y/n> " ANSWER
+    OLD_STTY=`stty -g`
+    stty raw -echo
+    ANSWER=$(head -c 1)
+    stty ${OLD_STTY}
     if [ "${ANSWER}" != "${ANSWER#[Yy]}" ]; then
         echo "Here we go!"
     else
@@ -235,6 +248,7 @@ fi
 
 sudo_warning "Checking DMI table for system product name"
 test_if_virtualbox
+prompt_sleep
 
 # Update Apt Archives
 
