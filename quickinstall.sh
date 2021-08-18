@@ -192,7 +192,7 @@ build_install_gtest_libs () {
 
 prompt_sleep () {
     SLEEP_TIME=${1:-"3"}
-    if [ "${TUSK_NO_PROMPT}X" -eq "YESX" ]; then
+    if [ "${TUSK_NO_PROMPT}X" = "YESX" ]; then
         echo
         sleep ${SLEEP_TIME}
     fi
