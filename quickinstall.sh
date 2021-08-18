@@ -221,9 +221,9 @@ echo
 echo "**************************************************************"
 echo "You will be downloading and installing approximately 300 MB of software. This may take some time depending on the speed of your network and the speed of your computer."
 echo "Do not shutdown or put your computer to sleep until you see your prompt again."
-echo "If you're not ready to continue press the control key and the 'c' key; you have 5 seconds to abort."
+echo "If you're not ready to continue press the control key and the 'c' key; you have 15 seconds to abort."
 echo "**************************************************************"
-sleep 5
+sleep 15
 
 
 # Update Apt Archives
