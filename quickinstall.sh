@@ -4,6 +4,29 @@
 #
 # Tested on Ubuntu 20.04.2 LTS
 #
+# Env. Variables
+# TUSK_NO_PROMPT
+#   Set this to "YES" to skip over the initial warning and prompt.
+#   The default value is nil.
+# TUSK_APT_SOURCES_HOSTURL
+#   The URL used for apt.
+#   The default value is http://us.archive.ubuntu.com/ubuntu/
+# TUSK_PACKAGE_SRC
+#   The URL for a list of packages to install. One package per line.
+#   The default value is
+#   https://raw.githubusercontent.com/mshafae/tusk/main/packages.txt
+# TUSK_INSTALL_ATOM
+#   Set to "YES" to install Atom.
+#   The default value is nil.
+# TUSK_INSTALL_SLACK
+#   Set to "YES" to install Slack.
+#   The default value is nil.
+# TUSK_IS_VB
+#   This variable is set by the script after using dmidecode to
+#   determine if the host is a VirtualBox VM or not. It doesn't
+#   check for any other hypervisor.
+#
+
 
 sudo_warning () {
     echo "${1}. Elevating priveleges."
