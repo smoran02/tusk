@@ -1,5 +1,14 @@
-#!/bin/sh -vx
+#!/bin/sh
+#
+# Quick Install script to get an Ubuntu system up and running.
+#
+# Tested on Ubuntu 20.04.2 LTS
+#
 
+sudo_warning () {
+    echo "${1}. Elevating priveleges."
+    echo "Enter your login password if prompted."
+}
 
 overide_apt_sources () {
     HOSTURL=${1}
@@ -7,27 +16,29 @@ overide_apt_sources () {
     NOW=`date +%Y%m%d%H%M%S`
     OG="/etc/apt/sources.list"
     BAK="${OG}.${NOW}"
-    echo "Backing up ${OG} to ${BAK}. Elevating priveleges."
-    echo "Enter your login password if prompted."
+    sudo_warning "Backing up ${OG} to ${BAK}"
     sudo cp ${OG} ${BAK}
     if [ $? -ne 0 ]; then
         echo "Could not backup ${OG}. Exiting."
         exit 1
     fi
-    echo "Creating new ${OG}. Elevating priveleges."
-    echo "Enter your login password if prompted."
-    sudo cat > ${OG} << EOF
-deb ${HOSTURL} ${CODENAME} main restricted
-deb ${HOSTURL} ${CODENAME}-updates main restricted
-deb ${HOSTURL} ${CODENAME} universe
-deb ${HOSTURL} ${CODENAME}-updates universe
-deb ${HOSTURL} ${CODENAME} multiverse
-deb ${HOSTURL} ${CODENAME}-updates multiverse
-deb ${HOSTURL} ${CODENAME}-backports main restricted universe multiverse
-deb ${HOSTURL} ${CODENAME}-security main restricted
-deb ${HOSTURL} ${CODENAME}-security universe
-deb ${HOSTURL} ${CODENAME}-security multiverse
-EOF
+    sudo_warning "Creating new ${OG}"
+    echo | sudo tee ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} main restricted" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates main restricted" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} universe" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates universe" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} multiverse" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates multiverse" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-backports main restricted universe" | sudo tee -a ${OG} multiverse && \
+    echo "deb ${HOSTURL} ${CODENAME}-security main restricted" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-security universe" | sudo tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-security multiverse" | sudo tee -a ${OG}
+
+    if [ $? -ne 0 ]; then
+        echo "Problem creating new ${OG}. Exiting."
+        exit 1
+    fi
 }
 
 test_dns_web () {
@@ -36,11 +47,21 @@ test_dns_web () {
     if [ "${RV}x" != "200x" ]; then
         echo "The network is down or slow; check to make sure are connected to your network. If connecting to Eduroam, seek assistance."
         exit 1
+    else
+        echo "Success! You can download files from the Internet."
     fi
 }
 
+test_if_virtualbox () {
+    PRODUCT_NAME=`sudo dmidecode -s system-product-name`
+    if [ "${PRODUCT_NAME}X" = "VirtualBoxX" ]; then
+        export TUSK_IS_VB="YES"
+    else
+        export TUSK_IS_VB="NO"
+    fi
+}
 
-insallfromdeb () {
+install_from_deb () {
     URL=$1
     DEB=$2
     if [ -x ${DEB} ]; then
@@ -51,8 +72,15 @@ insallfromdeb () {
     echo "Fetching ${DEB}..."
     wget -q ${URL} -O ${DEB}
     if [ $? -ne 0 ]; then
-        echo "Failed downloading Zoom. Exiting."
+        echo "Failed downloading ${DEB}. Exiting."
         exit 1
+    fi
+    echo "Checking to see if it is already installed..."
+    PACKAGE_NAME=`dpkg-deb -I ${DEB}  | awk '/Package: / {print $2}'`
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' ${PACKAGE_NAME}
+    if [ $? -eq 0 ]; then
+        echo "Already installed, skipping."
+        return
     fi
     echo "Checking dependencies..."
     echo "${DEB} depends on: "
@@ -77,6 +105,21 @@ insallfromdeb () {
     sudo rm -f ${DEB}
 }
 
+version_check () {
+    LSB_DESCRIPTION=`lsb_release -d  | awk {'first = $1; $1=""; gsub("^ ", ""); print $0'}`
+    TESTED_ON="Ubuntu 20.04.2 LTS"
+
+    echo "Your system is ${LSB_DESCRIPTION}."
+    if [ ${LSB_DESCRIPTION} != ${TESTED_ON} ]; then
+        echo "This script was tested on ${TESTED_ON}."
+        echo "It is possible that this script will not work as expected."
+    else
+        echo "This script was tested on your system."
+        echo "You shouldn't enounter any errors."
+    fi
+    echo "If you encounter errors, please seek assistance on Slack."
+}
+
 sudo_check () {
     echo "Checking if you can execute commands with elevated priveleges."
     echo "Enter your login password when prompted."
@@ -88,21 +131,56 @@ sudo_check () {
     fi
 }
 
-sudo_warning () {
-    echo "${1}. Elevating priveleges."
-    echo "Enter your login password if prompted."
+build_install_gtest_libs () {
+    BUILDDIR="/tmp/gmockbuild.$$"
+    DESTROOT=${1:-"/usr/local/"}
+    echo "Building Google Test and Google Mock libraries in ${DESTROOT}."
+    mkdir -p ${BUILDDIR}
+    PWD=$(pwd)
+    cd ${BUILDDIR}
+    cmake -DCMAKE_BUILD_TYPE=RELEASE /usr/src/googletest/googlemock
+    make
+    sudo_warning "Creating destination directory in ${DESTROOT}"
+    sudo mkdir -p ${DESTROOT}/lib
+    if [ $? -ne 0 ]; then
+        echo "Could not create destination. Exiting."
+        exit 1
+    fi
+    sudo_warning "Installing GTest and GMock libraries into ${DESTROOT}"
+    LIBS="libgtest.a libgtest_main.a libgmock.a libgmock_main.a"
+    for LIB  in ${LIBS}; do
+        sudo install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
+        if [ $? -ne 0 ]; then
+            echo "Could not install ${LIB}. Exiting."
+            exit 1
+        fi
+    done
+
+    cd ${PWD}
 }
+
 
 
 #####
 # Main
 #####
 
+# Check arch, if not x86_64 then stop
+ARCH=`arch`
+if [ ${ARCH} != "X86_64" ]; then
+    echo "Sorry this is only for AMD64 and X86_64 architectures."
+    echo "Your architecture is ${ARCH}."
+    echo "Exiting."
+    exit 1
+fi
+
 # Check ID, make sure user is not root
 ID=$(id -u)
 if [ ${ID} -eq 0 ]; then
     echo "WARNING: You are running this as root."
 fi
+
+version_check
 
 # Sudo check
 sudo_check
@@ -123,7 +201,10 @@ if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
     fi
 fi
 
-# Update
+sudo_warning "Checking DMI table for system product name"
+test_if_virtualbox
+
+# Update Apt Archives
 
 # Updating /etc/apt/sources.list
 APT_SOURCES_HOSTURL=${TUSK_APT_SOURCES_HOSTURL:-"http://us.archive.ubuntu.com/ubuntu/"}
@@ -133,7 +214,9 @@ echo "Apt archive url is ${APT_SOURCES_HOSTURL}"
 
 URLREGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 
-if [[ $APT_SOURCES_HOSTURL =~ $URLREGEX ]]; then
+# BASH-ism!
+#if [[ $APT_SOURCES_HOSTURL =~ $URLREGEX ]]; then
+if echo $APT_SOURCES_HOSTURL | egrep -q $URLREGEX; then
     CODENAME=`lsb_release -c | cut -f 2`
     ORIGINAL_APT_SOURCES=`overide_apt_sources  ${APT_SOURCES_HOSTURL} ${CODENAME}`
 else
@@ -147,7 +230,7 @@ sudo apt-get -q update
 
 # Install packages
 PACKAGE_SRC=${TUSK_PACKAGE_SRC:-"https://raw.githubusercontent.com/mshafae/tusk/main/packages.txt"}
-PACKAGES_RAW=`wget -O - ${PACKAGE_SRC}`
+PACKAGES_RAW=`wget -q ${PACKAGE_SRC} -O-`
 if [ $? -ne 0 ]; then
     echo "Could not fetch package list from ${PACKAGE_SRC}. Exiting."
     exit 1
@@ -166,168 +249,142 @@ if [ $? -ne 0 ]; then
 fi
 
 # Non-packaged software
-# Atom 
-#https://atom.io/download/deb
 
 # Zoom
 echo "Installing Zoom"
 DEB="/tmp/zoom_amd64.deb"
 URL="https://zoom.us/client/latest/zoom_amd64.deb"
-insallfromdeb ${URL} ${DEB}
+install_from_deb ${URL} ${DEB}
 
 # VSCode
 echo "Installing VS Code"
 DEB="/tmp/vscode_amd64.deb"
 URL="
 https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
-insallfromdeb ${URL} ${DEB}
+install_from_deb ${URL} ${DEB}
 
 # Discord
 DEB="/tmp/discord_amd64.deb"
 URL="https://discord.com/api/download?platform=linux&format=deb"
-insallfromdeb ${URL} ${DEB}
+install_from_deb ${URL} ${DEB}
 
-# Atom - disabled
-if [ "X" = "Y" ]; then
+# Atom
+if [ "${TUSK_INSTALL_ATOM}X" = "YESX" ]; then
     echo "Installing Atom"
     DEB="/tmp/atom_amd64.deb"
     URL="https://atom.io/download/deb"
-    insallfromdeb ${URL} ${DEB}
+    install_from_deb ${URL} ${DEB}
+fi
+
+# Slack
+if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
+    DEB="/tmp/slack_amd64.deb"
+    URL="http://delaunay.ecs.fullerton.edu/slack_4.18.0-1.1_amd64.deb"
+    install_from_deb ${URL} ${DEB}
 fi
 
 
 # GitHub client, Bazel, VirtualBox, Vagrant
-
-sudo_warning "Adding GitHub GPG key"
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+PENDING_PACKAGES=""
+dpkg-query -W -f='${Package} ${Status} ${Version}\n' gh > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "Could not add the GitHub gpg key. Exiting."
-    exit 1
-fi
-sudo_warning "Adding GitHub repository"
-sudo apt-add-repository https://cli.github.com/packages
-if [ $? -ne 0 ]; then
-    echo "Could not add the GitHub repository. Exiting."
-    exit 1
-fi
-
-BAZELGPG="/tmp/bazel-release.pub.gpg"
-BAZELDEARMOR="/tmp/bazel.gpg"
-BAZELDEST="/etc/apt/trusted.gpg.d/bazel.gpg"
-echo "Fetching Bazel GPG key."
-wget -q https://bazel.build/bazel-release.pub.gpg -O ${BAZELGPG}
-if [ $? -ne 0 ]; then
-    echo "Error fetching Bazel GPG key. Exiting."
-    exit 1
-fi
-cat ${BAZELGPG} | gpg --dearmor > $BAZELDEARMOR
-if [ $? -ne 0 ]; then
-    echo "Error dearmoring the key. Exiting."
-    exit 1
-fi
-sudo_warning "Moving Bazel GPG key into place"
-sudo mv ${BAZELDEARMOR} ${BAZELDEST}
-if [ $? -ne 0 ]; then
-    echo "Error moving key into place. Exiting."
-    exit 1
-fi
-sudo_warning "Creating Bazel apt source file"
-sudo echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list
-if [ $? -ne 0 ]; then
-    echo "Error creating Bazel source file. Exiting."
-    exit 1
+    sudo_warning "Adding GitHub GPG key"
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+    if [ $? -ne 0 ]; then
+        echo "Could not add the GitHub gpg key. Exiting."
+        exit 1
+    fi
+    sudo_warning "Adding GitHub repository"
+    sudo apt-add-repository https://cli.github.com/packages
+    if [ $? -ne 0 ]; then
+        echo "Could not add the GitHub repository. Exiting."
+        exit 1
+    fi
+    PENDING_PACKAGES="gh ${PENDING_PACKAGES}"
 fi
 
-# Virtualbox
-sudo_warning "Adding VirtualBox GPG key"
-wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+dpkg-query -W -f='${Package} ${Status} ${Version}\n' bazel > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "Error adding first VirtualBox GPG key. Exiting."
-    exit 1
-fi
-wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-if [ $? -ne 0 ]; then
-    echo "Error adding second VirtualBox GPG key. Exiting."
-    exit 1
-fi
-sudo_warning "Adding VirtualBox apt source"
-sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
-if [ $? -ne 0 ]; then
-    echo "Error adding adding VirtualBox repository. Exiting."
-    exit 1
+    BAZELGPG="/tmp/bazel-release.pub.gpg"
+    BAZELDEARMOR="/tmp/bazel.gpg"
+    BAZELDEST="/etc/apt/trusted.gpg.d/bazel.gpg"
+    echo "Fetching Bazel GPG key."
+    wget -q https://bazel.build/bazel-release.pub.gpg -O ${BAZELGPG}
+    if [ $? -ne 0 ]; then
+        echo "Error fetching Bazel GPG key. Exiting."
+        exit 1
+    fi
+    cat ${BAZELGPG} | gpg --dearmor > $BAZELDEARMOR
+    if [ $? -ne 0 ]; then
+        echo "Error dearmoring the key. Exiting."
+        exit 1
+    fi
+    sudo_warning "Moving Bazel GPG key into place"
+    sudo mv ${BAZELDEARMOR} ${BAZELDEST}
+    if [ $? -ne 0 ]; then
+        echo "Error moving key into place. Exiting."
+        exit 1
+    fi
+    sudo_warning "Creating Bazel apt source file"
+    echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee  /etc/apt/sources.list.d/bazel.list
+    if [ $? -ne 0 ]; then
+        echo "Error creating Bazel source file. Exiting."
+        exit 1
+    fi
+    PENDING_PACKAGES="bazel ${PENDING_PACKAGES}"
 fi
 
-sudo_warning "Adding Vagrant GPG key"
-wget -q https://apt.releases.hashicorp.com/gpg -O- | sudo apt-key add -
-if [ $? -ne 0 ]; then
-    echo "Error adding Vagrant GPG key. Exiting."
-    exit 1
-fi
-sudo_warning "Adding Vagrant repository"
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-if [ $? -ne 0 ]; then
-    echo "Error adding adding Vagrant repository. Exiting."
-    exit 1
+if [ "${TUSK_IS_VB}X" != "YESX" ]; then
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' virtualbox-6.1 > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # Virtualbox
+        sudo_warning "Adding VirtualBox GPG key"
+        wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+        if [ $? -ne 0 ]; then
+            echo "Error adding first VirtualBox GPG key. Exiting."
+            exit 1
+        fi
+        wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+        if [ $? -ne 0 ]; then
+            echo "Error adding second VirtualBox GPG key. Exiting."
+            exit 1
+        fi
+        sudo_warning "Adding VirtualBox apt source"
+        sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
+        if [ $? -ne 0 ]; then
+            echo "Error adding adding VirtualBox repository. Exiting."
+            exit 1
+        fi
+        PENDING_PACKAGES="virtualbox-6.1 ${PENDING_PACKAGES}"
+    fi
+
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' vagrant > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # Vagrant
+        sudo_warning "Adding Vagrant GPG key"
+        wget -q https://apt.releases.hashicorp.com/gpg -O- | sudo apt-key add -
+        if [ $? -ne 0 ]; then
+            echo "Error adding Vagrant GPG key. Exiting."
+            exit 1
+        fi
+        sudo_warning "Adding Vagrant repository"
+        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+        if [ $? -ne 0 ]; then
+            echo "Error adding adding Vagrant repository. Exiting."
+            exit 1
+        fi
+        PENDING_PACKAGES="vagrant ${PENDING_PACKAGES}"
+    fi
+
 fi
 
-sudo_warning "Installing bazel, gh, virtualbox, and vagrant"
+sudo_warning "Installing ${PENDING_PACKAGES}"
 sudo apt-get update
-sudo apt-get install -y bazel gh virtualbox-6.1 vagrant
+sudo apt-get install -y ${PENDING_PACKAGES}
 
 # GTest and GMock libraries
-echo "Building Google Test and Google Mock libraries in /usr/local."
-BUILDDIR="/tmp/gmockbuild.$$"
-DESTROOT="/usr/local/"
-mkdir -p ${BUILDDIR}
-PWD=$(pwd)
-cd ${BUILDDIR}
-cmake -DCMAKE_BUILD_TYPE=RELEASE /usr/src/googletest/googlemock
-make
-sudo_warning "Creating destination directory in ${DESTROOT}"
-sudo mkdir -p ${DESTROOT}/lib
-if [ $? -ne 0 ]; then
-    echo "Could not create destination. Exiting."
-    exit 1
-fi
-sudo_warning "Installing GTest and GMock libraries"
-LIBS="libgtest.a libgtest_main.a libgmock.a libgmock_main.a"
-foreach LIB ( ${LIBS} )
-    sudo install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
-    if [ $? -ne 0 ]; then
-        echo "Could not install ${LIB}. Exiting."
-        exit 1
-    fi
-done
-
-if [ "YES" = "NO" ]; then
-    sudo install -o root -g root -m 644 ./lib/libgtest.a ${DESTROOT}/lib
-    if [ $? -ne 0 ]; then
-        echo "Could not install libgtest.a. Exiting."
-        exit 1
-    fi
-
-    sudo install -o root -g root -m 644 ./lib/libgtest_main.a ${DESTROOT}/lib
-    if [ $? -ne 0 ]; then
-        echo "Could not install libgtest_main.a. Exiting."
-        exit 1
-    fi
-    sudo install -o root -g root -m 644 ./lib/libgmock.a ${DESTROOT}/lib
-    if [ $? -ne 0 ]; then
-        echo "Could not install libgmock.a. Exiting."
-        exit 1
-    fi
-
-    sudo install -o root -g root -m 644 ./lib/libgmock_main.a ${DESTROOT}/lib
-    if [ $? -ne 0 ]; then
-        echo "Could not install libgmock_main.a. Exiting."
-        exit 1
-    fi
-fi
-
-cd ${PWD}
-
-
+build_install_gtest_libs "/usr/local"
 
 # Post install
 sudo_warning "Cleaning up!"
-apt-get clean
+sudo apt-get clean
