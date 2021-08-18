@@ -141,7 +141,7 @@ version_check () {
     TESTED_ON="Ubuntu 20.04.2 LTS"
 
     echo "Your system is ${LSB_DESCRIPTION}."
-    if [ ${LSB_DESCRIPTION} != ${TESTED_ON} ]; then
+    if [ "${LSB_DESCRIPTION}X" != "${TESTED_ON}X" ]; then
         echo "This script was tested on ${TESTED_ON}."
         echo "It is possible that this script will not work as expected."
     else
