@@ -222,9 +222,9 @@ echo "You will be downloading and installing approximately 300 MB of software. T
 echo "Do not shutdown or put your computer to sleep until you see your prompt again."
 
 if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
-    echo -n "Are you ready to continue? [y/n]"
-    read answer
-    if [ "${answer}" != "${answer#[Yy]}" ]; then
+    echo "Are you ready to continue?"
+    read -p "y/n> " ANSWER
+    if [ "${ANSWER}" != "${ANSWER#[Yy]}" ]; then
         echo "Here we go!"
     else
         echo "No sweat, you can always run this program later. Exiting."
