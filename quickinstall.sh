@@ -223,10 +223,11 @@ echo "Do not shutdown or put your computer to sleep until you see your prompt ag
 
 if [ "${TUSK_NO_PROMPT}x" = "x" ]; then
     echo "Are you ready to continue?"
-    read -p "y/n> " ANSWER
+    read -t 20 -p "y/n> " ANSWER
     if [ "${ANSWER}" != "${ANSWER#[Yy]}" ]; then
         echo "Here we go!"
     else
+        echo "You said ${ANSWER}."
         echo "No sweat, you can always run this program later. Exiting."
         exit 0
     fi
