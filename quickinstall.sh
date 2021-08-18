@@ -198,7 +198,7 @@ build_install_gtest_libs () {
 
 # Check arch, if not x86_64 then stop
 ARCH=`arch`
-if [ ${ARCH} != "X86_64" ]; then
+if [ ${ARCH} != "x86_64" ]; then
     echo "Sorry this is only for AMD64 and X86_64 architectures."
     echo "Your architecture is ${ARCH}."
     echo "Exiting."
