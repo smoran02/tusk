@@ -24,6 +24,7 @@ intel2gas
 libc++abi-dev
 libxcb-xinerama0
 libc++-dev
+libegl1
 libegl1-mesa
 libfontconfig1
 libgbm1
