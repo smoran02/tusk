@@ -114,6 +114,7 @@ install_from_deb () {
     echo "${DEB} depends on: "
     #dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); n=split($0,deps,","); for(i=1;i<=n;i++) print deps[i] }'
     DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); gsub("\\(.*[0-9].*\\)",""); gsub(", ", " "); print}')
+    echo ${DEPS}
     echo "Elevating priveleges to install ${DEB} dependencies."
     echo "Enter your login password if prompted."
     sudo apt-get install -y $DEPS
@@ -219,11 +220,12 @@ test_if_virtualbox
 
 echo
 echo "**************************************************************"
-echo "You will be downloading and installing more than 300 MB of"
+echo "You will be downloading and installing more than 650 MB of"
 echo "software. This may take some time depending on the speed of"
 echo "your network and the speed of your computer."
+echo
 echo "Do not shutdown or put your computer to sleep until you see"
-echo  "your prompt again. The prompt has the '\$' in it."
+echo  "your prompt again."
 echo
 echo "If you're not ready to continue press the control key and"
 echo "the 'c' key to abort. You have 15 seconds to abort."
@@ -240,8 +242,6 @@ echo "Apt archive url is ${APT_SOURCES_HOSTURL}"
 
 URLREGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 
-# BASH-ism!
-#if [[ $APT_SOURCES_HOSTURL =~ $URLREGEX ]]; then
 if echo $APT_SOURCES_HOSTURL | egrep -q $URLREGEX; then
     CODENAME=`lsb_release -c | cut -f 2`
     ORIGINAL_APT_SOURCES=`overide_apt_sources  ${APT_SOURCES_HOSTURL} ${CODENAME}`
