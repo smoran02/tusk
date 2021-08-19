@@ -264,7 +264,7 @@ if [ "${PACKAGES}x" = "x" ]; then
     exit 1
 fi
 sudo_warning "Installing packages."
-sudo apt-get install -y ${PACKAGES}
+sudo apt-get -f install -y ${PACKAGES}
 if [ $? -ne 0 ]; then
     echo "Could not install packages in packages.txt. Exiting."
     exit 1
