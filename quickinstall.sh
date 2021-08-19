@@ -260,7 +260,7 @@ fi
 
 
 sudo_warning "Upgrading base OS and all installed packages."
-sudo apt-get -q upgrade
+sudo apt-get -q -y upgrade
 if [ $? -ne 0 ]; then
     echo "Could not upgrade OS or installed packages. Exiting."
     exit 1
