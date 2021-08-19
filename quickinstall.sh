@@ -219,15 +219,19 @@ test_if_virtualbox
 
 echo
 echo "**************************************************************"
-echo "You will be downloading and installing approximately 300 MB of software. This may take some time depending on the speed of your network and the speed of your computer."
-echo "Do not shutdown or put your computer to sleep until you see your prompt again."
-echo "If you're not ready to continue press the control key and the 'c' key; you have 15 seconds to abort."
+echo "You will be downloading and installing more than 300 MB of"
+echo "software. This may take some time depending on the speed of"
+echo "your network and the speed of your computer."
+echo "Do not shutdown or put your computer to sleep until you see"
+echo  "your prompt again. The prompt has the '\$' in it."
+echo
+echo "If you're not ready to continue press the control key and"
+echo "the 'c' key to abort. You have 15 seconds to abort."
 echo "**************************************************************"
 sleep 15
 
 
 # Update Apt Archives
-
 # Updating /etc/apt/sources.list
 APT_SOURCES_HOSTURL=${TUSK_APT_SOURCES_HOSTURL:-"http://us.archive.ubuntu.com/ubuntu/"}
 
@@ -249,6 +253,19 @@ fi
 
 sudo_warning "Updating your package"
 sudo apt-get -q update
+if [ $? -ne 0 ]; then
+    echo "Could not update APT indices. Exiting."
+    exit 1
+fi
+
+
+sudo_warning "Upgrading base OS and all installed packages."
+sudo apt-get -q upgrade
+if [ $? -ne 0 ]; then
+    echo "Could not upgrade OS or installed packages. Exiting."
+    exit 1
+fi
+
 
 # Install packages
 PACKAGE_SRC=${TUSK_PACKAGE_SRC:-"https://raw.githubusercontent.com/mshafae/tusk/main/packages.txt"}
