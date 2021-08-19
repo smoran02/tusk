@@ -58,7 +58,7 @@ overide_apt_sources () {
     echo "deb ${HOSTURL} ${CODENAME}-updates universe" | sudo tee -a ${OG} && \
     echo "deb ${HOSTURL} ${CODENAME} multiverse" | sudo tee -a ${OG} && \
     echo "deb ${HOSTURL} ${CODENAME}-updates multiverse" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-backports main restricted universe" | sudo tee -a ${OG} multiverse && \
+    echo "deb ${HOSTURL} ${CODENAME}-backports main restricted universe multiverse" | sudo tee -a ${OG} && \
     echo "deb ${HOSTURL} ${CODENAME}-security main restricted" | sudo tee -a ${OG} && \
     echo "deb ${HOSTURL} ${CODENAME}-security universe" | sudo tee -a ${OG} && \
     echo "deb ${HOSTURL} ${CODENAME}-security multiverse" | sudo tee -a ${OG}
