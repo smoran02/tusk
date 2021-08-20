@@ -1,0 +1,17 @@
+# 2021-08-20-00
+libcurl4
+libxml2
+libedit2
+libsqlite3-0
+libc6-dev
+binutils
+libgcc-9-dev
+libstdc++-9-dev
+zlib1g-dev
+libz3-dev
+libpython2.7
+tzdata
+pkg-config
+gnupg2
+curl  
+

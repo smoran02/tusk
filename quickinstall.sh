@@ -268,14 +268,14 @@ fi
 
 
 # Install packages
-PACKAGE_SRC=${TUSK_PACKAGE_SRC:-"https://raw.githubusercontent.com/mshafae/tusk/main/packages.txt"}
+PACKAGE_SRC=${TUSK_PACKAGE_SRC:-"https://raw.githubusercontent.com/mshafae/tusk/main/packages/base.txt"}
 PACKAGES_RAW=`wget -q ${PACKAGE_SRC} -O-`
 if [ $? -ne 0 ]; then
     echo "Could not fetch package list from ${PACKAGE_SRC}. Exiting."
     exit 1
 fi
 
-PACKAGES=`echo ${PACKAGES_RAW} | sort | uniq`
+PACKAGES=`echo ${PACKAGES_RAW} | grep -v "^#" | sort | uniq`
 if [ "${PACKAGES}x" = "x" ]; then
     echo "Problem reading the packages.txt file. Exiting."
     exit 1
