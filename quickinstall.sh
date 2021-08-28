@@ -34,7 +34,7 @@
 
 
 sudo_warning () {
-    echo "${1}. Elevating priveleges."
+    echo "${1}. Elevating privileges."
     echo "Enter your login password if prompted."
 }
 
