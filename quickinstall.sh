@@ -2,11 +2,20 @@
 #
 # Quick Install script to get an Ubuntu system up and running.
 #
-# Tested on Ubuntu 20.04.2 LTS
+# Tested on Ubuntu 20.04.3 LTS amd64
 #
 # Env. Variables
+# TUSK_WARN
+#   Set to "NO" to override the warning and wait.
+#   The default value is YES
+# TUSK_APT_SOURCES_OVERRIDE
+#   Set to "YES" to override the default apt sources list with custom URL
+#   (see TUSK_APT_SOURCES_HOSTURL) or with additional repositories.
+#   The value is YES if the distribution is Ubuntu, otherwise
+#   it is NO. Setting it to NO in the environment prior to execution will
+#   set it NO.
 # TUSK_APT_SOURCES_HOSTURL
-#   The URL used for apt.
+#   The URL used for apt; used in conjunction with TUSK_APT_SOURCES_OVERRIDE
 #   The default value is http://us.archive.ubuntu.com/ubuntu/
 # TUSK_PACKAGE_SRC
 #   The URL for a list of packages to install. One package per line.
@@ -134,18 +143,49 @@ install_from_deb () {
     sudo rm -f ${DEB}
 }
 
+arch_check () {
+    ARCH=`arch`
+echo "Your architecture is ${ARCH}."
+if [ ${ARCH} != "x86_64" ]; then
+    echo "WARNING: This has not been tested for architectures other than" \
+    "AMD64 and x86_64."
+    echo "You may encounter errors. Please send a screen shot of any errors to"
+    echo "mshafae@fullerton.edu with a description of your Linux distribution"
+    echo "and your computer's make and model."
+else
+    echo "Your Linux system is using a well tested architecture."
+fi
+}
+
+distribution_check () {
+    DIST=`lsb_release -d  | awk {'first = $1; $1=""; gsub("^ ", ""); print $0'}`
+    if echo ${DIST} | grep "Ubuntu" > /dev/null 2>&1; then
+        DISTRIBUTION="Ubuntu"
+        TUSK_APT_SOURCES_OVERRIDE=${TUSK_APT_SOURCES_OVERRIDE:-"YES"}
+    elif echo ${DIST} | grep "Mint" > /dev/null 2>&1; then
+        DISTRIBUTION="Mint"
+        export TUSK_APT_SOURCES_OVERRIDE="NO"
+    else
+        DISTRIBUTION="Untested"
+        export TUSK_APT_SOURCES_OVERRIDE="NO"
+    fi
+    echo "Your Linux distribution is ${DIST}."
+    if [ "${DISTRIBUTION}x" = "Untestedx" ]; then
+        echo "This distribution is untested."
+        echo "You may encounter errors."
+        echo "Please post to CSUF Tuffix Slack with a description of your"
+        echo "Linux distribution and your computer's make and model."
+        echo "Please include screen shots of your error."
+    fi
+}
+
+
 version_check () {
     LSB_DESCRIPTION=`lsb_release -d  | awk {'first = $1; $1=""; gsub("^ ", ""); print $0'}`
-    TESTED_ON="Ubuntu 20.04.2 LTS"
+    TESTED_ON="Ubuntu 20.04.3 LTS Linux Mint 20.2"
 
     echo "Your system is ${LSB_DESCRIPTION}."
-    if [ "${LSB_DESCRIPTION}X" != "${TESTED_ON}X" ]; then
-        echo "This script was tested on ${TESTED_ON}."
-        echo "It is possible that this script will not work as expected."
-    else
-        echo "This script was tested on your system."
-        echo "You shouldn't enounter any errors."
-    fi
+    echo "This script was tested on ${TESTED_ON}."
     echo "If you encounter errors, please seek assistance on Slack."
 }
 
@@ -188,18 +228,12 @@ build_install_gtest_libs () {
     cd ${PWD}
 }
 
-#####
-# Main
-#####
 
-# Check arch, if not x86_64 then stop
-ARCH=`arch`
-if [ ${ARCH} != "x86_64" ]; then
-    echo "Sorry this is only for AMD64 and x86_64 architectures."
-    echo "Your architecture is ${ARCH}."
-    echo "Exiting."
-    exit 1
-fi
+#######
+# Main
+#######
+
+arch_check
 
 # Check ID, make sure user is not root
 ID=$(id -u)
@@ -207,49 +241,54 @@ if [ ${ID} -eq 0 ]; then
     echo "WARNING: You are running this as root."
 fi
 
-version_check
+distribution_check
 
-# Sudo check
 sudo_check
 
 echo "Testing your network connection."
 test_dns_web
 
-sudo_warning "Checking DMI table for system product name"
+sudo_warning "Checking DMI table for system product name; checking for VBox."
 test_if_virtualbox
 
-echo
-echo "**************************************************************"
-echo "You will be downloading and installing more than 650 MB of"
-echo "software. This may take some time depending on the speed of"
-echo "your network and the speed of your computer."
-echo
-echo "Do not shutdown or put your computer to sleep until you see"
-echo  "your prompt again."
-echo
-echo "If you're not ready to continue press the control key and"
-echo "the 'c' key to abort. You have 15 seconds to abort."
-echo "**************************************************************"
-sleep 15
-
+TUSK_WARN=${TUSK_WARN:-"YES"}
+if [ "${TUSK_WARN}x" = "YESx" ]; then
+    echo
+    echo "**************************************************************"
+    echo "You will be downloading and installing more than 650 MB of"
+    echo "software. This may take some time depending on the speed of"
+    echo "your network and the speed of your computer."
+    echo
+    echo "Do not shutdown or put your computer to sleep until you see"
+    echo "your prompt again."
+    echo
+    echo "If you're not ready to continue press the control key and"
+    echo "the 'c' key to abort. You have 15 seconds to abort."
+    echo "**************************************************************"
+    sleep 15
+fi
 
 # Update Apt Archives
 # Updating /etc/apt/sources.list
-APT_SOURCES_HOSTURL=${TUSK_APT_SOURCES_HOSTURL:-"http://us.archive.ubuntu.com/ubuntu/"}
+if [ "${TUSK_APT_SOURCES_OVERRIDE}x" = "YESx" ]; then
+    echo "Overriding apt sources."
+    APT_SOURCES_HOSTURL=${TUSK_APT_SOURCES_HOSTURL:-"http://us.archive.ubuntu.com/ubuntu/"}
 
-echo "Apt archive url is ${APT_SOURCES_HOSTURL}"
+    echo "Apt archive url is ${APT_SOURCES_HOSTURL}"
 
 
-URLREGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+    URLREGEX='(https?)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
 
-if echo $APT_SOURCES_HOSTURL | egrep -q $URLREGEX; then
-    CODENAME=`lsb_release -c | cut -f 2`
-    ORIGINAL_APT_SOURCES=`overide_apt_sources  ${APT_SOURCES_HOSTURL} ${CODENAME}`
+    if echo $APT_SOURCES_HOSTURL | egrep -q $URLREGEX; then
+        CODENAME=`lsb_release -c | cut -f 2`
+        ORIGINAL_APT_SOURCES=`overide_apt_sources  ${APT_SOURCES_HOSTURL} ${CODENAME}`
+    else
+        echo "$APT_SOURCES_HOSTURL is not a valid URL. Exiting."
+        exit 1
+    fi
 else
-    echo "$APT_SOURCES_HOSTURL is not a valid URL. Exiting."
-    exit 1
+    echo "Apt sources are unchanged from default."
 fi
-
 
 sudo_warning "Updating your package"
 sudo apt-get -q update
@@ -293,34 +332,72 @@ fi
 # Zoom
 echo "Installing Zoom"
 DEB="/tmp/zoom_amd64.deb"
-URL="https://zoom.us/client/latest/zoom_amd64.deb"
-install_from_deb ${URL} ${DEB}
+if [ ${ARCH} = "x86_64" ]; then
+    URL="https://zoom.us/client/latest/zoom_amd64.deb"
+elif [ ${ARCH} = "i386" ]; then
+    URL="https://zoom.us/client/5.4.53391.1108/zoom_i386.deb"
+else
+    unset URL
+    echo "Cannot install, ${ARCH} not supported."
+fi
+if [ "${URL}x" != "x" ]; then
+    install_from_deb ${URL} ${DEB}
+fi
 
 # VSCode
 echo "Installing VS Code"
 DEB="/tmp/vscode_amd64.deb"
-URL="
-https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
-install_from_deb ${URL} ${DEB}
+if [ ${ARCH} = "x86_64" ]; then
+    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+else
+    unset URL
+    echo "Cannot install, ${ARCH} not supported."
+    echo "Manually install by visiting https://code.visualstudio.com/#alt-downloads"
+fi
+if [ "${URL}x" != "x" ]; then
+    install_from_deb ${URL} ${DEB}
+fi
 
 # Discord
 DEB="/tmp/discord_amd64.deb"
-URL="https://discord.com/api/download?platform=linux&format=deb"
-install_from_deb ${URL} ${DEB}
+if [ ${ARCH} = "x86_64" ]; then
+    URL="https://discord.com/api/download?platform=linux&format=deb"
+else
+    unset URL
+    echo "Cannot install, ${ARCH} not supported."
+fi
+if [ "${URL}x" != "x" ]; then
+    install_from_deb ${URL} ${DEB}
+fi
 
 # Atom
 if [ "${TUSK_INSTALL_ATOM}X" = "YESX" ]; then
     echo "Installing Atom"
     DEB="/tmp/atom_amd64.deb"
-    URL="https://atom.io/download/deb"
-    install_from_deb ${URL} ${DEB}
+    if [ ${ARCH} = "x86_64" ]; then
+        URL="https://atom.io/download/deb"
+    else
+        unset URL
+        echo "Cannot install, ${ARCH} not supported."
+    fi
+    if [ "${URL}x" != "x" ]; then
+        install_from_deb ${URL} ${DEB}
+    fi
+
 fi
 
 # Slack
 if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
     DEB="/tmp/slack_amd64.deb"
-    URL="http://delaunay.ecs.fullerton.edu/slack_4.18.0-1.1_amd64.deb"
-    install_from_deb ${URL} ${DEB}
+    if [ ${ARCH} = "x86_64" ]; then
+        URL="http://delaunay.ecs.fullerton.edu/slack_4.18.0-1.1_amd64.deb"
+    else
+        unset URL
+        echo "Cannot install, ${ARCH} not supported."
+    fi
+    if [ "${URL}x" != "x" ]; then
+        install_from_deb ${URL} ${DEB}
+    fi
 fi
 
 
@@ -431,4 +508,5 @@ build_install_gtest_libs "/usr/local"
 
 # Post install
 sudo_warning "Cleaning up!"
+sudo apt-get -y autoremove
 sudo apt-get clean
