@@ -193,13 +193,13 @@ build_install_gtest_libs () {
 #####
 
 # Check arch, if not x86_64 then stop
-ARCH=`arch`
-if [ ${ARCH} != "x86_64" ]; then
-    echo "Sorry this is only for AMD64 and x86_64 architectures."
-    echo "Your architecture is ${ARCH}."
-    echo "Exiting."
-    exit 1
-fi
+#ARCH=`arch`
+#if [ ${ARCH} != "x86_64" ]; then
+#    echo "Sorry this is only for AMD64 and x86_64 architectures."
+#    echo "Your architecture is ${ARCH}."
+#    echo "Exiting."
+#    exit 1
+#fi
 
 # Check ID, make sure user is not root
 ID=$(id -u)
