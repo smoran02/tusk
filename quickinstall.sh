@@ -228,6 +228,11 @@ build_install_gtest_libs () {
     cd ${PWD}
 }
 
+tusksleep () {
+    if [ "${TUSK_WARN}x" = "YESx" ]; then
+        sleep $1
+    fi
+}
 
 #######
 # Main
@@ -346,13 +351,18 @@ fi
 
 # VSCode
 echo "Installing VS Code"
-DEB="/tmp/vscode_amd64.deb"
+DEB="/tmp/vscode.deb"
 if [ ${ARCH} = "x86_64" ]; then
     URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+elif [ ${ARCH} = "i386" ]; then
+    URL="https://github.com/VSCodium/vscodium/releases/download/1.35.1/codium_1.35.1-1560422388_i386.deb"
+    echo "Architecture is ${ARCH}; installing VSCodium 1.35.1 as an alternate."
 else
     unset URL
     echo "Cannot install, ${ARCH} not supported."
     echo "Manually install by visiting https://code.visualstudio.com/#alt-downloads"
+    echo "Or consider using VSCodium https://vscodium.com/"
+    tusksleep 5
 fi
 if [ "${URL}x" != "x" ]; then
     install_from_deb ${URL} ${DEB}
@@ -383,7 +393,6 @@ if [ "${TUSK_INSTALL_ATOM}X" = "YESX" ]; then
     if [ "${URL}x" != "x" ]; then
         install_from_deb ${URL} ${DEB}
     fi
-
 fi
 
 # Slack
