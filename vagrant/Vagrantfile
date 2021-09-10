@@ -2,31 +2,30 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  #if ENV.has_key?('VAGRANTGUI')
-  #  config.vm.box = "fasmat/ubuntu2004-desktop"
-  #else
-  #  config.vm.box = "ubuntu/focal64"
-  #end
+  # Bare Ubuntu desktop install
   config.vm.box = "mshafae/ubuntu-focal-desktop"
+  # Already intialized with all the quickinstall packages
+  #config.vm.box = "mshafae/ubuntu-focal-tusk-desktop"
   config.vm.synced_folder "..", "/tusk"
   config.vm.synced_folder Dir.home, "/hosthome"
 
   config.vm.provider "virtualbox" do |vb|
     # Customize the amount of memory on the VM
-    # You ought to be OK with 512 MB; increase if you need more.
+    # You ought to be OK with 512 MB if you're not turning on the GUI
     #vb.memory = "512"
     if ENV.has_key?('VAGRANTGUI')
+      # If the GUI is enabled, have at least 2 GB of RAM.
       #vb.memory = "2048"
       vb.gui = true
     end
   end
 
-  #config.vm.provision "shell", inline: <<-SHELL
+  # Provision by executing the local copy of quickinstall.sh
+  config.vm.provision "shell", inline: <<-SHELL
+    # See quickinstall.sh for all the environment variables.
     # If you have a local mirror, use the URL here
     #TUSK_APT_SOURCES_HOSTURL="http://192.168.1.64/ubuntu"; export TUSK_APT_SOURCES_HOSTURL
-    #TUSK_NO_PROMPT="YES"; export TUSK_NO_PROMPT
-    # If you'd like the change to be permanent, say YES
-    #TUSK_APT_SOURCES_HOST_PERMANENT="YES"; export TUSK_APT_SOURCES_HOST_PERMANENT
-    #cat /tusk/quickinstall.sh | sh
-  #SHELL
+    #TUSK_WARN="NO"; export TUSK_WARN
+    cat /tusk/quickinstall.sh | sh
+  SHELL
 end
