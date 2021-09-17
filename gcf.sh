@@ -36,26 +36,26 @@ prompt_confirm_repeat () {
 }
 
 mkgitconfig () {
-    GITCONFIG=`eval ${1:-"~/.gitconfig"}`
+    GITCONFIG=${1:-"${HOME}/.gitconfig"}
     NAME="${2}"
     EMAIL="${3}"
     NOW=`date +"%Y%m%d-%S"`
     cat > ${GITCONFIG} <<EOF
 # Generated with gcf.sh on ${NOW}
 [user]
-        name = ${NAME}
-        email = ${EMAIL}
+    name = ${NAME}
+    email = ${EMAIL}
 [core]
     pager = less
     editor = gedit -w -s
 [credential]
-        helper = cache
+    helper = cache
 [pull]
-        rebase = false
+    rebase = false
 [push]
-        default = matching
+    default = matching
 [init]
-        defaultBranch = main
+    defaultBranch = main
 [help]
     autocorrect = 20
 [color]
@@ -67,8 +67,9 @@ EOF
 # Main
 ######
 
-GITCONFIG=${1:-"~/.gitconfig"}
-echo "We are going to edit the file ${GITCONFIG} to make git work better for you. Ready, set, go!"
+GITCONFIG=${1:-"${HOME}/.gitconfig"}
+echo "We are going to edit the file ${GITCONFIG} to make git work better for you."
+echo "Ready, set, go!"
 prompt_confirm_repeat "What is your full name? Please include your first and last name. " "Great, here's another question..."
 NAME=${RETVAL}
 
@@ -76,7 +77,7 @@ prompt_confirm_repeat "What's your CSUF email address? " "Excellent, here's anot
 EMAIL=${RETVAL}
 
 if [ -e ${GITCONFIG} ]; then
-    echo "The file ${GITCONFIG} exists, so we'll make a backup by copying it to a file with the same name that ends in '.og'."
+    echo "The file ${GITCONFIG} exists, so we'll make a backup."
     backup_file ${GITCONFIG}
 fi
 
