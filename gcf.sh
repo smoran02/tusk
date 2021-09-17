@@ -36,7 +36,7 @@ prompt_confirm_repeat () {
 }
 
 mkgitconfig () {
-    GITCONFIG=${1:-"~/.gitconfig"}
+    GITCONFIG=`eval ${1:-"~/.gitconfig"}`
     NAME="${2}"
     EMAIL="${3}"
     NOW=`date +"%Y%m%d-%S"`
@@ -68,7 +68,7 @@ EOF
 ######
 
 GITCONFIG=${1:-"~/.gitconfig"}
-echo ${GITCONFIG}
+echo "We are going to edit the file ${GITCONFIG} to make git work better for you. Ready, set, go!"
 prompt_confirm_repeat "What is your full name? Please include your first and last name. " "Great, here's another question..."
 NAME=${RETVAL}
 
