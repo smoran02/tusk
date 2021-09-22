@@ -47,7 +47,7 @@ mkgitconfig () {
     email = ${EMAIL}
 [core]
     pager = less
-    editor = gedit -w -s
+    editor = nano
 [credential]
     helper = cache
 [pull]
