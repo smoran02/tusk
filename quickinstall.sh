@@ -421,7 +421,13 @@ if [ $? -ne 0 ]; then
         exit 1
     fi
     sudo_warning "Adding GitHub repository"
-    sudo apt-add-repository https://cli.github.com/packages
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+    if [ $? -ne 0 ]; then
+        echo "Could not add the GitHub key to keychain. Exiting."
+        exit 1
+    fi
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    #sudo apt-add-repository https://cli.github.com/packages
     if [ $? -ne 0 ]; then
         echo "Could not add the GitHub repository. Exiting."
         exit 1
