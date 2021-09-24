@@ -218,7 +218,18 @@ build_install_gtest_libs () {
     sudo_warning "Installing GTest and GMock libraries into ${DESTROOT}"
     LIBS="libgtest.a libgtest_main.a libgmock.a libgmock_main.a"
     for LIB  in ${LIBS}; do
-        sudo install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
+        if [ -r ./lib/${LIB} ]; then
+            sudo install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
+        elif [ -r ./gtest/${LIB} ]; then
+            # Raspbian has an older version that builds slightly differently.
+            sudo install -o root -g root -m 644 ./gtest/${LIB} ${DESTROOT}/lib
+        elif [ -r ./${LIB} ]; then
+            # Raspbian has an older version that builds slightly differently.
+            sudo install -o root -g root -m 644 ./${LIB} ${DESTROOT}/lib
+        else
+            echo "Could not locate ${LIB} in lib, gtest, or CWD. Exiting."
+            exit 1
+        fi
         if [ $? -ne 0 ]; then
             echo "Could not install ${LIB}. Exiting."
             exit 1
