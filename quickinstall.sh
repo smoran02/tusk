@@ -3,6 +3,7 @@
 # Quick Install script to get an Ubuntu system up and running.
 #
 # Tested on Ubuntu 20.04.3 LTS amd64
+#           Raspbian 10 (buster)
 #
 # Env. Variables
 # TUSK_WARN
@@ -346,6 +347,7 @@ fi
 # Non-packaged software
 
 # Zoom
+# https://zoom.us/download?os=linux
 echo "Installing Zoom"
 DEB="/tmp/zoom_amd64.deb"
 if [ ${ARCH} = "x86_64" ]; then
@@ -368,6 +370,10 @@ if [ ${ARCH} = "x86_64" ]; then
 elif [ ${ARCH} = "i386" ]; then
     URL="https://github.com/VSCodium/vscodium/releases/download/1.35.1/codium_1.35.1-1560422388_i386.deb"
     echo "Architecture is ${ARCH}; installing VSCodium 1.35.1 as an alternate."
+elif [ ${ARCH} = "aarch64" ]; then
+    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64"
+elif [ ${ARCH} = "armv7l" ]; then
+    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-armhf"
 else
     unset URL
     echo "Cannot install, ${ARCH} not supported."
