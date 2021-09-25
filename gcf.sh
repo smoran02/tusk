@@ -2,9 +2,9 @@
 #
 # Git Config Fixer
 #
-# Creates a config file that will cache your GitHub Personal Access Token
-# and set some other settings that align with daily use for a lower division
-# computer science course.
+# Creates a config file that will save your GitHub Personal Access Token via
+# libsecret and set some other settings that align with daily use for a lower
+# division computer science course.
 #
 
 backup_file ()
@@ -97,7 +97,7 @@ fi
 
 echo
 echo "We're about to install some software and compile a few things."
-echo "This may take a second."
+echo "This may take a minute."
 echo
 
 git_libsecret_install
