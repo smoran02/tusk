@@ -36,6 +36,7 @@ libgraphicsmagick++1-dev
 libgstreamer-plugins-base1.0-0
 libgtest-dev
 libgtk-3-0
+libheif-examples
 libnss3
 libpulse0
 libreadline-dev
