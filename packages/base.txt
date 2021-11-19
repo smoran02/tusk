@@ -3,6 +3,7 @@ aptitude
 autoconf
 automake
 build-essential
+cifs-utils
 clang
 clang-format
 clang-tidy
