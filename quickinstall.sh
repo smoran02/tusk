@@ -6,6 +6,10 @@
 #           Raspbian 10 (buster)
 #
 # Env. Variables
+# ARCH
+#   Set to the output of `arch`
+#   Used to determine what deb to download for things not in a
+#   package repository.
 # TUSK_WARN
 #   Set to "NO" to override the warning and wait.
 #   The default value is YES
