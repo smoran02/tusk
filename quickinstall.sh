@@ -336,6 +336,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Mint doesn't have libgmock and lohman json
 PACKAGES=`cat ${PACKAGES_FILE} | grep -v "^#" | sort | uniq`
 if [ "${PACKAGES}x" = "x" ]; then
     echo "Problem reading the packages.txt file. Exiting."
