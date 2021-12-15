@@ -432,8 +432,30 @@ if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
 fi
 
 
-# GitHub client, Bazel, VirtualBox, Vagrant
+# Docker, GitHub client, Bazel, VirtualBox, Vagrant
 PENDING_PACKAGES=""
+
+# Docker
+dpkg-query -W -f='${Package} ${Status} ${Version}\n' docker > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    # Follows instructions given on https://docs.docker.com/engine/install/ubuntu/
+    sudo_warning "Adding Docker GPG key"
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    if [ $? -ne 0 ]; then
+        echo "Could not add the Docker gpg key to keychain. Exiting."
+        exit 1
+    fi
+    sudo_warning "Adding Docker repository"
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Could not add the Docker repository. Exiting."
+        exit 1
+    fi
+    PENDING_PACKAGES="ca-certificates curl gnupg lsb-release docker-ce docker-ce-cli containerd.io ${PENDING_PACKAGES}"
+fi
+
+# GitHub client
 dpkg-query -W -f='${Package} ${Status} ${Version}\n' gh > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     sudo_warning "Adding GitHub GPG key"
@@ -457,6 +479,7 @@ if [ $? -ne 0 ]; then
     PENDING_PACKAGES="gh ${PENDING_PACKAGES}"
 fi
 
+# Bazel
 dpkg-query -W -f='${Package} ${Status} ${Version}\n' bazel > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     BAZELGPG="/tmp/bazel-release.pub.gpg"
@@ -488,6 +511,7 @@ if [ $? -ne 0 ]; then
     PENDING_PACKAGES="bazel ${PENDING_PACKAGES}"
 fi
 
+# VirtualBox & Vagrant
 if [ "${TUSK_IS_VB}X" != "YESX" ]; then
     if [ "${TUSK_INSTALL_VIRTUALBOX}X" = "YESX" ]; then
         dpkg-query -W -f='${Package} ${Status} ${Version}\n' virtualbox-6.1 > /dev/null 2>&1
