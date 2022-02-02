@@ -21,12 +21,16 @@ git_libsecret_install () {
     echo "If you are prompted for a password, type in the password"
     echo "you used to login to this computer. Remember, it won't"
     echo "print out what you type as a security precaution."
+    sudo apt-get update
+    echo "Updated your packages, let's install some packages..."
     sudo apt-get install -y libsecret-1-0 libsecret-1-dev seahorse
+    echo "Great, the packages were installed. Let's build libsecret..."
     sudo make -C ${LIBSECRETGIT}
     if [ $? -ne 0 ]; then
         echo "There was a problem building git's libsecret plugin. Exiting. Please report this to mshafae@fullerton.edu."
         exit 1
     fi
+    echo "Excellent, we've got all the parts ready to go."
     #git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 }
 
@@ -91,7 +95,7 @@ prompt_confirm_repeat "What's your CSUF email address? " "Excellent, here's anot
 EMAIL=${RETVAL}
 
 if [ -e ${GITCONFIG} ]; then
-    echo "The file ${GITCONFIG} exists, so we'll make a backup."
+    echo "The file ${GITCONFIG} exists, so we'll make a backup just in case."
     backup_file ${GITCONFIG}
 fi
 
@@ -101,6 +105,7 @@ echo "This may take a minute."
 echo
 
 git_libsecret_install
+echo "Let's write out a new git configuration."
 mkgitconfig ${GITCONFIG} ${NAME} ${EMAIL}
 
 echo
