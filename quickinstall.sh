@@ -3,6 +3,7 @@
 # Quick Install script to get an Ubuntu system up and running.
 #
 # Tested on Ubuntu 20.04.3 LTS amd64
+#           Ubuntu 22.04 LTS amd64
 #           Raspbian 10 (buster)
 #
 # Env. Variables
@@ -107,7 +108,7 @@ install_from_deb () {
     URL=$1
     DEB=$2
     if [ -x ${DEB} ]; then
-        echo "${DEB} exists, removing old file. Elevating priveleges."
+        echo "${DEB} exists, removing old file. Elevating privileges."
         echo "Enter your login password if prompted."
         sudo rm -f ${DEB}
     fi
@@ -143,7 +144,7 @@ install_from_deb () {
         echo "Problem installing ${DEB}. Exiting."
         exit 1
     fi
-    echo "Installed. Removing ${DEB}. Elevating priveleges."
+    echo "Installed. Removing ${DEB}. Elevating privileges."
     echo "Enter your login password if prompted."
     sudo rm -f ${DEB}
 }
@@ -195,7 +196,7 @@ version_check () {
 }
 
 sudo_check () {
-    echo "Checking if you can execute commands with elevated priveleges."
+    echo "Checking if you can execute commands with elevated privileges."
     echo "Enter your login password when prompted."
     echo "NOTE: your password will be invisible. Type it carefully and slowly, then press enter."
     sudo echo "You can run commands as root!"
@@ -242,6 +243,19 @@ build_install_gtest_libs () {
     done
 
     cd ${PWD}
+}
+
+build_install_git_libsecret () {
+    LIBSECRETGIT="/usr/share/doc/git/contrib/credential/libsecret"
+    if [ -d ${LIBSECRETGIT}]; then
+      sudo make -C ${LIBSECRETGIT}
+      if [ $? -ne 0 ]; then
+          echo "There was a problem building git's libsecret plugin. Exiting. Please report this to mshafae@fullerton.edu."
+          exit 1
+      fi
+    else
+      echo "${LIBSECRETGIT} does not exist; skipping."
+    fi
 }
 
 tusksleep () {
@@ -402,21 +416,6 @@ if [ "${URL}x" != "x" ]; then
     install_from_deb ${URL} ${DEB}
 fi
 
-# Atom
-if [ "${TUSK_INSTALL_ATOM}X" = "YESX" ]; then
-    echo "Installing Atom"
-    DEB="/tmp/atom_amd64.deb"
-    if [ ${ARCH} = "x86_64" ]; then
-        URL="https://atom.io/download/deb"
-    else
-        unset URL
-        echo "Cannot install, ${ARCH} not supported."
-    fi
-    if [ "${URL}x" != "x" ]; then
-        install_from_deb ${URL} ${DEB}
-    fi
-fi
-
 # Slack
 if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
     DEB="/tmp/slack_amd64.deb"
@@ -480,36 +479,36 @@ if [ $? -ne 0 ]; then
 fi
 
 # Bazel
-dpkg-query -W -f='${Package} ${Status} ${Version}\n' bazel > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    BAZELGPG="/tmp/bazel-release.pub.gpg"
-    BAZELDEARMOR="/tmp/bazel.gpg"
-    BAZELDEST="/etc/apt/trusted.gpg.d/bazel.gpg"
-    echo "Fetching Bazel GPG key."
-    wget -q https://bazel.build/bazel-release.pub.gpg -O ${BAZELGPG}
-    if [ $? -ne 0 ]; then
-        echo "Error fetching Bazel GPG key. Exiting."
-        exit 1
-    fi
-    cat ${BAZELGPG} | gpg --dearmor > $BAZELDEARMOR
-    if [ $? -ne 0 ]; then
-        echo "Error dearmoring the key. Exiting."
-        exit 1
-    fi
-    sudo_warning "Moving Bazel GPG key into place"
-    sudo mv ${BAZELDEARMOR} ${BAZELDEST}
-    if [ $? -ne 0 ]; then
-        echo "Error moving key into place. Exiting."
-        exit 1
-    fi
-    sudo_warning "Creating Bazel apt source file"
-    echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee  /etc/apt/sources.list.d/bazel.list
-    if [ $? -ne 0 ]; then
-        echo "Error creating Bazel source file. Exiting."
-        exit 1
-    fi
-    PENDING_PACKAGES="bazel ${PENDING_PACKAGES}"
-fi
+# dpkg-query -W -f='${Package} ${Status} ${Version}\n' bazel > /dev/null 2>&1
+# if [ $? -ne 0 ]; then
+#     BAZELGPG="/tmp/bazel-release.pub.gpg"
+#     BAZELDEARMOR="/tmp/bazel.gpg"
+#     BAZELDEST="/etc/apt/trusted.gpg.d/bazel.gpg"
+#     echo "Fetching Bazel GPG key."
+#     wget -q https://bazel.build/bazel-release.pub.gpg -O ${BAZELGPG}
+#     if [ $? -ne 0 ]; then
+#         echo "Error fetching Bazel GPG key. Exiting."
+#         exit 1
+#     fi
+#     cat ${BAZELGPG} | gpg --dearmor > $BAZELDEARMOR
+#     if [ $? -ne 0 ]; then
+#         echo "Error dearmoring the key. Exiting."
+#         exit 1
+#     fi
+#     sudo_warning "Moving Bazel GPG key into place"
+#     sudo mv ${BAZELDEARMOR} ${BAZELDEST}
+#     if [ $? -ne 0 ]; then
+#         echo "Error moving key into place. Exiting."
+#         exit 1
+#     fi
+#     sudo_warning "Creating Bazel apt source file"
+#     echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee  /etc/apt/sources.list.d/bazel.list
+#     if [ $? -ne 0 ]; then
+#         echo "Error creating Bazel source file. Exiting."
+#         exit 1
+#     fi
+#     PENDING_PACKAGES="bazel ${PENDING_PACKAGES}"
+# fi
 
 # VirtualBox & Vagrant
 if [ "${TUSK_IS_VB}X" != "YESX" ]; then
@@ -566,6 +565,9 @@ sudo apt-get install -y ${PENDING_PACKAGES}
 
 # GTest and GMock libraries
 build_install_gtest_libs "/usr/local"
+
+# Git password cache using libsecret and GNOME keychain.
+build_install_git_libsecret
 
 # Post install
 sudo_warning "Cleaning up!"

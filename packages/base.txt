@@ -42,6 +42,8 @@ libnss3
 libpulse0
 libreadline-dev
 libsecret-1-0
+libsecret-1-dev
+libsecret-tools
 libsm6
 libsqlite3-0
 libxcb-image0
@@ -67,8 +69,8 @@ nlohmann-json3-dev
 openssh-client
 openssh-server
 python3-distutils
+seahorse
 software-properties-common
-subversion
 synaptic
 texlive
 valgrind
