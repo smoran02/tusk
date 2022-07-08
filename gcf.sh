@@ -10,10 +10,10 @@
 backup_file ()
 {
   DATE=`date +"%Y%m%d-%S"`
-  NAME=${1}
-  NEWNAME=${NAME}-${DATE}.og
-  echo "Copying ${NAME} to ${NEWNAME}"
-  cp "$NAME" "${NEWNAME}"
+  FILENAME=${1}
+  NEWFILENAME=${FILENAME}-${DATE}.og
+  echo "Copying ${FILENAME} to ${NEWFILENAME}"
+  cp "$FILENAME" "${NEWFILENAME}"
 }
 
 git_libsecret_install () {
@@ -106,7 +106,7 @@ echo
 
 git_libsecret_install
 echo "Let's write out a new git configuration."
-mkgitconfig ${GITCONFIG} ${NAME} ${EMAIL}
+mkgitconfig "${GITCONFIG}" "${NAME}" "${EMAIL}"
 
 echo
 echo "You're all set! Try using git to push or clone and see if your credentials are saved."
