@@ -247,7 +247,7 @@ build_install_gtest_libs () {
 
 build_install_git_libsecret () {
     LIBSECRETGIT="/usr/share/doc/git/contrib/credential/libsecret"
-    if [ -d ${LIBSECRETGIT}]; then
+    if [ -d ${LIBSECRETGIT} ]; then
       sudo make -C ${LIBSECRETGIT}
       if [ $? -ne 0 ]; then
           echo "There was a problem building git's libsecret plugin. Exiting. Please report this to mshafae@fullerton.edu."
