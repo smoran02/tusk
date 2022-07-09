@@ -27,8 +27,14 @@
 #   The URL for a list of packages to install. One package per line.
 #   The default value is
 #   https://raw.githubusercontent.com/mshafae/tusk/main/packages.txt
-# TUSK_INSTALL_ATOM
-#   Set to "YES" to install Atom.
+# TUSK_INSTALL_DOCKER
+#   Set to "YES" to install Docker.
+#   The default value is nil.
+# TUSK_INSTALL_DISCORD
+#   Set to "YES" to install Discord.
+#   The default value is nil.
+# TUSK_INSTALL_GITHUBCLIENT
+#   Set to "YES" to install GitHub Client (gh).
 #   The default value is nil.
 # TUSK_INSTALL_SLACK
 #   Set to "YES" to install Slack.
@@ -41,6 +47,12 @@
 #   Set to "YES" to install Vagrant. TUSK_INSTALL_VIRTUALBOX must 
 #   also be set to "YES".
 #   The default value is nil.
+# TUSK_INSTALL_VSCODE
+#   Set to "YES" to install Microsoft VS Code.
+#   The default value is YES.
+# TUSK_INSTALL_ZOOM
+#   Set to "YES" to install Zoom.
+#   The default value is YES.
 # TUSK_IS_VB
 #   This variable is set by the script after using dmidecode to
 #   determine if the host is a VirtualBox VM or not. It doesn't
@@ -101,6 +113,15 @@ test_if_virtualbox () {
         export TUSK_IS_VB="YES"
     else
         export TUSK_IS_VB="NO"
+    fi
+}
+
+apt_get_update () {
+    sudo_warning "Updating your package"
+    sudo apt-get -q update
+    if [ $? -ne 0 ]; then
+        echo "Could not update APT indices. Exiting."
+        exit 1
     fi
 }
 
@@ -325,13 +346,13 @@ else
     echo "Apt sources are unchanged from default."
 fi
 
-sudo_warning "Updating your package"
-sudo apt-get -q update
-if [ $? -ne 0 ]; then
-    echo "Could not update APT indices. Exiting."
-    exit 1
-fi
-
+# sudo_warning "Updating your package"
+# sudo apt-get -q update
+# if [ $? -ne 0 ]; then
+#     echo "Could not update APT indices. Exiting."
+#     exit 1
+# fi
+apt_get_update
 
 sudo_warning "Upgrading base OS and all installed packages."
 sudo apt-get -q -y dist-upgrade
@@ -367,118 +388,143 @@ fi
 
 # Zoom
 # https://zoom.us/download?os=linux
-echo "Installing Zoom"
-DEB="/tmp/zoom_amd64.deb"
-if [ ${ARCH} = "x86_64" ]; then
-    URL="https://zoom.us/client/latest/zoom_amd64.deb"
-elif [ ${ARCH} = "i386" ]; then
-    URL="https://zoom.us/client/5.4.53391.1108/zoom_i386.deb"
-else
-    unset URL
-    echo "Cannot install, ${ARCH} not supported."
-fi
-if [ "${URL}x" != "x" ]; then
-    install_from_deb ${URL} ${DEB}
+# See
+# https://support.zoom.us/hc/en-us/articles/204206269-Installing-or-updating-Zoom-on-Linux#h_f75692f2-5e13-4526-ba87-216692521a82
+# for requirements
+TUSK_INSTALL_ZOOM=${TUSK_INSTALL_ZOOM:-"YES"}
+if [ "${TUSK_INSTALL_ZOOM}X" = "YESX" ]; then
+    echo "Installing Zoom"
+    DEB="/tmp/zoom_amd64.deb"
+    # Install prerequisites
+    # sudo apt-get -f install -y ibus libegl1-mesa libfontconfig1 libgl1-mesa-glx libglib2.0-0 \
+    # libgstreamer-plugins-base0.10-0  libpulse0 libsm6 libsqlite3-0 libxcb-image0 libxcb-keysyms1 \
+    # libxcb-randr0 libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-xinerama0 libxcb-xtest0 \
+    # libxcomposite1 libxi6 libxrender1 libxslt1.1
+    if [ ${ARCH} = "x86_64" ]; then
+      URL="https://zoom.us/client/latest/zoom_amd64.deb"
+    elif [ ${ARCH} = "i386" ]; then
+      URL="https://zoom.us/client/5.4.53391.1108/zoom_i386.deb"
+    else
+      unset URL
+      echo "Cannot install, ${ARCH} not supported."
+    fi
+    if [ "${URL}x" != "x" ]; then
+      install_from_deb ${URL} ${DEB}
+    fi
 fi
 
 # VSCode
-echo "Installing VS Code"
-DEB="/tmp/vscode.deb"
-if [ ${ARCH} = "x86_64" ]; then
-    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
-elif [ ${ARCH} = "i386" ]; then
-    URL="https://github.com/VSCodium/vscodium/releases/download/1.35.1/codium_1.35.1-1560422388_i386.deb"
-    echo "Architecture is ${ARCH}; installing VSCodium 1.35.1 as an alternate."
-elif [ ${ARCH} = "aarch64" ]; then
-    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64"
-elif [ ${ARCH} = "armv7l" ]; then
-    URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-armhf"
-else
-    unset URL
-    echo "Cannot install, ${ARCH} not supported."
-    echo "Manually install by visiting https://code.visualstudio.com/#alt-downloads"
-    echo "Or consider using VSCodium https://vscodium.com/"
-    tusksleep 5
-fi
-if [ "${URL}x" != "x" ]; then
-    install_from_deb ${URL} ${DEB}
+TUSK_INSTALL_VSCODE=${TUSK_INSTALL_VSCODE:-"YES"}
+if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
+    echo "Installing VS Code"
+    DEB="/tmp/vscode.deb"
+    if [ ${ARCH} = "x86_64" ]; then
+      URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+    elif [ ${ARCH} = "i386" ]; then
+      URL="https://github.com/VSCodium/vscodium/releases/download/1.35.1/codium_1.35.1-1560422388_i386.deb"
+      echo "Architecture is ${ARCH}; installing VSCodium 1.35.1 as an alternate."
+    elif [ ${ARCH} = "aarch64" ]; then
+      URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64"
+    elif [ ${ARCH} = "armv7l" ]; then
+      URL="https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-armhf"
+    else
+      unset URL
+      echo "Cannot install, ${ARCH} not supported."
+      echo "Manually install by visiting https://code.visualstudio.com/#alt-downloads"
+      echo "Or consider using VSCodium https://vscodium.com/"
+      tusksleep 5
+    fi
+    if [ "${URL}x" != "x" ]; then
+      echo 
+      install_from_deb ${URL} ${DEB}
+    fi
 fi
 
 # Discord
-DEB="/tmp/discord_amd64.deb"
-if [ ${ARCH} = "x86_64" ]; then
-    URL="https://discord.com/api/download?platform=linux&format=deb"
-else
-    unset URL
-    echo "Cannot install, ${ARCH} not supported."
-fi
-if [ "${URL}x" != "x" ]; then
-    install_from_deb ${URL} ${DEB}
+if [ "${TUSK_INSTALL_DISCORD}X" = "YESX" ]; then
+    DEB="/tmp/discord_amd64.deb"
+    echo "Installing Discord."
+    if [ ${ARCH} = "x86_64" ]; then
+      URL="https://discord.com/api/download?platform=linux&format=deb"
+    else
+      unset URL
+      echo "Cannot install, ${ARCH} not supported."
+    fi
+    if [ "${URL}x" != "x" ]; then
+      install_from_deb ${URL} ${DEB}
+    fi
 fi
 
 # Slack
-if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
-    DEB="/tmp/slack_amd64.deb"
-    if [ ${ARCH} = "x86_64" ]; then
-        URL="http://delaunay.ecs.fullerton.edu/slack_4.18.0-1.1_amd64.deb"
-    else
-        unset URL
-        echo "Cannot install, ${ARCH} not supported."
-    fi
-    if [ "${URL}x" != "x" ]; then
-        install_from_deb ${URL} ${DEB}
-    fi
-fi
+# Turned off for now because delaunay no longer has the archive.
+# if [ "${TUSK_INSTALL_SLACK}X" = "YESX" ]; then
+#     DEB="/tmp/slack_amd64.deb"
+#     echo "Installing Slack"
+#     if [ ${ARCH} = "x86_64" ]; then
+#         URL="http://delaunay.ecs.fullerton.edu/slack_4.18.0-1.1_amd64.deb"
+#     else
+#         unset URL
+#         echo "Cannot install, ${ARCH} not supported."
+#     fi
+#     if [ "${URL}x" != "x" ]; then
+#         install_from_deb ${URL} ${DEB}
+#     fi
+# fi
 
 
 # Docker, GitHub client, Bazel, VirtualBox, Vagrant
 PENDING_PACKAGES=""
 
 # Docker
-dpkg-query -W -f='${Package} ${Status} ${Version}\n' docker > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    # Follows instructions given on https://docs.docker.com/engine/install/ubuntu/
-    sudo_warning "Adding Docker GPG key"
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+if [ "${TUSK_INSTALL_DOCKER}X" = "YESX" ]; then
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' docker > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Could not add the Docker gpg key to keychain. Exiting."
-        exit 1
+      # Follows instructions given on https://docs.docker.com/engine/install/ubuntu/
+      sudo_warning "Adding Docker GPG key"
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      if [ $? -ne 0 ]; then
+          echo "Could not add the Docker gpg key to keychain. Exiting."
+          exit 1
+      fi
+      sudo_warning "Adding Docker repository"
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      if [ $? -ne 0 ]; then
+          echo "Could not add the Docker repository. Exiting."
+          exit 1
+      fi
+      PENDING_PACKAGES="ca-certificates curl gnupg lsb-release docker-ce docker-ce-cli containerd.io ${PENDING_PACKAGES}"
     fi
-    sudo_warning "Adding Docker repository"
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    if [ $? -ne 0 ]; then
-        echo "Could not add the Docker repository. Exiting."
-        exit 1
-    fi
-    PENDING_PACKAGES="ca-certificates curl gnupg lsb-release docker-ce docker-ce-cli containerd.io ${PENDING_PACKAGES}"
 fi
 
 # GitHub client
-dpkg-query -W -f='${Package} ${Status} ${Version}\n' gh > /dev/null 2>&1
-if [ $? -ne 0 ]; then
-    sudo_warning "Adding GitHub GPG key"
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+if [ "${TUSK_INSTALL_GITHUBCLIENT}X" = "YESX" ]; then
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' gh > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "Could not add the GitHub gpg key. Exiting."
-        exit 1
+      sudo_warning "Adding GitHub GPG key"
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      if [ $? -ne 0 ]; then
+          echo "Could not add the GitHub gpg key. Exiting."
+          exit 1
+      fi
+      sudo_warning "Adding GitHub repository"
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+      if [ $? -ne 0 ]; then
+          echo "Could not add the GitHub key to keychain. Exiting."
+          exit 1
+      fi
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+      #sudo apt-add-repository https://cli.github.com/packages
+      if [ $? -ne 0 ]; then
+          echo "Could not add the GitHub repository. Exiting."
+          exit 1
+      fi
+      PENDING_PACKAGES="gh ${PENDING_PACKAGES}"
     fi
-    sudo_warning "Adding GitHub repository"
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
-    if [ $? -ne 0 ]; then
-        echo "Could not add the GitHub key to keychain. Exiting."
-        exit 1
-    fi
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    #sudo apt-add-repository https://cli.github.com/packages
-    if [ $? -ne 0 ]; then
-        echo "Could not add the GitHub repository. Exiting."
-        exit 1
-    fi
-    PENDING_PACKAGES="gh ${PENDING_PACKAGES}"
 fi
 
 # Bazel
+# No one is using Bazel at the moment.
 # dpkg-query -W -f='${Package} ${Status} ${Version}\n' bazel > /dev/null 2>&1
 # if [ $? -ne 0 ]; then
 #     BAZELGPG="/tmp/bazel-release.pub.gpg"
@@ -560,7 +606,7 @@ if [ "${TUSK_IS_VB}X" != "YESX" ]; then
 fi
 
 sudo_warning "Installing ${PENDING_PACKAGES}"
-sudo apt-get update
+apt_get_update
 sudo apt-get install -y ${PENDING_PACKAGES}
 
 # GTest and GMock libraries
