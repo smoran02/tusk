@@ -170,16 +170,16 @@ install_from_deb () {
 
 arch_check () {
     ARCH=`arch`
-echo "Your architecture is ${ARCH}."
-if [ ${ARCH} != "x86_64" ]; then
-    echo "WARNING: This has not been tested for architectures other than" \
-    "AMD64 and x86_64."
-    echo "You may encounter errors. Please send a screen shot of any errors to"
-    echo "mshafae@fullerton.edu with a description of your Linux distribution"
-    echo "and your computer's make and model."
-else
-    echo "Your Linux system is using a well tested architecture."
-fi
+	echo "Your architecture is ${ARCH}."
+	if [ ${ARCH} != "x86_64" ]; then
+	    echo "WARNING: This has not been tested for architectures other than" \
+	    "AMD64 and x86_64."
+	    echo "You may encounter errors. Please send a screen shot of any errors to"
+	    echo "mshafae@fullerton.edu with a description of your Linux distribution"
+	    echo "and your computer's make and model."
+	else
+	    echo "Your Linux system is using a well tested architecture."
+	fi
 }
 
 distribution_check () {
