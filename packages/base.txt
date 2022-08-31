@@ -24,6 +24,7 @@ imagemagick
 libc++-dev
 libc++abi-dev
 libglib2.0-0
+libglib2.0-dev
 libgmock-dev
 libgraphicsmagick++1-dev
 libgtest-dev
