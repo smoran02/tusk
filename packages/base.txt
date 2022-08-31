@@ -1,4 +1,4 @@
-# 2022-07-08-00
+# 2022-07-19-00
 aptitude
 autoconf
 automake
@@ -21,6 +21,7 @@ gnupg
 gpg
 graphicsmagick
 imagemagick
+intel2gas
 libc++-dev
 libc++abi-dev
 libglib2.0-0
@@ -39,6 +40,7 @@ libyaml-cpp-dev
 lldb
 manpages-posix
 manpages-posix-dev
+nasm
 nlohmann-json3-dev
 openssh-client
 openssh-server
@@ -47,32 +49,3 @@ seahorse
 software-properties-common
 synaptic
 vim
-#ibus
-#intel2gas
-#libegl1
-#libegl1-mesa
-#libfontconfig1
-#libgbm1
-#libgl1-mesa-glx
-#libgstreamer-plugins-base1.0-0
-#libgtk-3-0
-#libnss3
-#libpulse0
-#libsecret-1-0
-#libsm6
-#libxcb-image0
-#libxcb-keysyms1
-#libxcb-randr0
-#libxcb-shape0
-#libxcb-shm0
-#libxcb-xfixes0
-#libxcb-xinerama0
-#libxcb-xtest0
-#libxcomposite1
-#libxi6
-#libxkbfile1
-#libxrender1
-#nasm
-#nfs-common
-#texlive
-#valgrind

@@ -17,9 +17,7 @@
 # TUSK_APT_SOURCES_OVERRIDE
 #   Set to "YES" to override the default apt sources list with custom URL
 #   (see TUSK_APT_SOURCES_HOSTURL) or with additional repositories.
-#   The value is YES if the distribution is Ubuntu, otherwise
-#   it is NO. Setting it to NO in the environment prior to execution will
-#   set it NO.
+#	The default value is NO
 # TUSK_APT_SOURCES_HOSTURL
 #   The URL used for apt; used in conjunction with TUSK_APT_SOURCES_OVERRIDE
 #   The default value is http://us.archive.ubuntu.com/ubuntu/
@@ -172,23 +170,23 @@ install_from_deb () {
 
 arch_check () {
     ARCH=`arch`
-echo "Your architecture is ${ARCH}."
-if [ ${ARCH} != "x86_64" ]; then
-    echo "WARNING: This has not been tested for architectures other than" \
-    "AMD64 and x86_64."
-    echo "You may encounter errors. Please send a screen shot of any errors to"
-    echo "mshafae@fullerton.edu with a description of your Linux distribution"
-    echo "and your computer's make and model."
-else
-    echo "Your Linux system is using a well tested architecture."
-fi
+	echo "Your architecture is ${ARCH}."
+	if [ ${ARCH} != "x86_64" ]; then
+	    echo "WARNING: This has not been tested for architectures other than" \
+	    "AMD64 and x86_64."
+	    echo "You may encounter errors. Please send a screen shot of any errors to"
+	    echo "mshafae@fullerton.edu with a description of your Linux distribution"
+	    echo "and your computer's make and model."
+	else
+	    echo "Your Linux system is using a well tested architecture."
+	fi
 }
 
 distribution_check () {
     DIST=`lsb_release -d  | awk {'first = $1; $1=""; gsub("^ ", ""); print $0'}`
     if echo ${DIST} | grep "Ubuntu" > /dev/null 2>&1; then
         DISTRIBUTION="Ubuntu"
-        TUSK_APT_SOURCES_OVERRIDE=${TUSK_APT_SOURCES_OVERRIDE:-"YES"}
+        TUSK_APT_SOURCES_OVERRIDE=${TUSK_APT_SOURCES_OVERRIDE:-"NO"}
     elif echo ${DIST} | grep "Mint" > /dev/null 2>&1; then
         DISTRIBUTION="Mint"
         export TUSK_APT_SOURCES_OVERRIDE="NO"
