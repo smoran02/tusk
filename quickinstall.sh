@@ -51,9 +51,9 @@
 # TUSK_INSTALL_ZOOM
 #   Set to "YES" to install Zoom.
 #   The default value is YES.
-# TUSK_IS_VB
+# TUSK_IS_VM
 #   This variable is set by the script after using dmidecode to
-#   determine if the host is a VirtualBox VM or not. It doesn't
+#   determine if the host is a VirtualBox VM, VMWare VM, or not. It doesn't
 #   check for any other hypervisor.
 #
 
@@ -105,12 +105,14 @@ test_dns_web () {
     fi
 }
 
-test_if_virtualbox () {
+test_if_virtualmachine () {
     PRODUCT_NAME=`sudo dmidecode -s system-product-name`
     if [ "${PRODUCT_NAME}X" = "VirtualBoxX" ]; then
-        export TUSK_IS_VB="YES"
+        export TUSK_IS_VM="YES"
+    elif [ "${PRODUCT_NAME}X" = "VMware Virtual PlatformX" ]; then
+        export TUSK_IS_VM="YES"
     else
-        export TUSK_IS_VB="NO"
+        export TUSK_IS_VM="NO"
     fi
 }
 
@@ -302,8 +304,8 @@ sudo_check
 echo "Testing your network connection."
 test_dns_web
 
-sudo_warning "Checking DMI table for system product name; checking for VBox."
-test_if_virtualbox
+sudo_warning "Checking DMI table for system product name; checking for VBox and VMWare."
+test_if_virtualmachine
 
 TUSK_WARN=${TUSK_WARN:-"YES"}
 if [ "${TUSK_WARN}x" = "YESx" ]; then
