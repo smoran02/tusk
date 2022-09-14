@@ -6,10 +6,17 @@
 # Run this as vagrant
 #
 
+export TUSK_WARN="NO"
+export TUSK_INSTALL_ZOOM="NO"
+
+wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh -O- | sh
+
 sudo apt update
 sudo apt install ssh
+
 mkdir ~/.ssh
 wget https://raw.githubusercontent.com/hashicorp/vagrant/main/keys/vagrant.pub -O ~/.ssh/authorized_keys
+
 chmod 0700 ~/.ssh
 chmod 0600 ~/.ssh/authorized_keys
 
