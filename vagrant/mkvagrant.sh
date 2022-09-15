@@ -9,6 +9,9 @@
 export TUSK_WARN="NO"
 export TUSK_INSTALL_ZOOM="NO"
 
+# optionally
+# sudo resolvectl dns eth0 192.168.1.64
+
 wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh -O- | sh
 
 sudo apt update
