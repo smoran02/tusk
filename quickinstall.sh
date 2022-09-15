@@ -461,6 +461,7 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
             sed -i 's/\(.*\)}/\l    "C_Cpp.clang_format_fallbackStyle": "Google"\n}/' ${SETTINGS} || \
                 { echo "Could not edit ${SETTINGS}."; exit 1; }
         else
+            mkdir -p $(dirname ${SETTINGS})
             cat > ${SETTINGS} <<EOF
 {
     "C_Cpp.clang_format_fallbackStyle": "Google"
@@ -635,9 +636,11 @@ if [ "${TUSK_IS_VB}X" != "YESX" ]; then
     fi
 fi
 
-sudo_warning "Installing ${PENDING_PACKAGES}"
-apt_get_update
-sudo apt-get install -y ${PENDING_PACKAGES}
+if [ "${PENDING_PACKAGES}X" != "X" ]; then
+    sudo_warning "Installing ${PENDING_PACKAGES}"
+    apt_get_update
+    sudo apt-get install -y ${PENDING_PACKAGES}
+fi
 
 # GTest and GMock libraries
 build_install_gtest_libs "/usr/local"
