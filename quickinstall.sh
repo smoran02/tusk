@@ -57,6 +57,14 @@
 #   check for any other hypervisor.
 #
 
+backup_file ()
+{
+  DATE=`date +"%Y%m%d-%S"`
+  NAME=${1}
+  NEWNAME=${NAME}-${DATE}.og
+  echo "Copying ${NAME} to ${NEWNAME}"
+  cp "$NAME" "${NEWNAME}"
+}
 
 sudo_warning () {
     echo "${1}. Elevating privileges."
@@ -438,6 +446,28 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
       echo 
       install_from_deb ${URL} ${DEB}
     fi
+    echo "Adding extensions for VS Code for every user with a shell."
+    EXTENSIONS="ms-vscode.cpptools ms-vscode.cpptools-extension-pack ms-vscode.cpptools-themes ms-vscode.hexeditor"
+    for user in $(grep "/bin/.*sh$" /etc/passwd | grep -v root | cut -f 1 -d\:); do
+        sudo_warning "User: ${user}"
+        for ext in ${EXTENSIONS}; do
+            sudo -l -u ${user} code --install-extension ${ext} || { echo "Failed installing ${ext} for ${user}."; exit 1; }            
+        done
+        echo "Setting VS Code to use the Google C++ Style ~${user}/.config/Code/User/settings.json"
+        SETTINGS=~${user}/.config/Code/User/settings.json
+        if [ -r ${SETTINGS} ]; then
+            backup_file ${SETTINGS}
+            # Find the last brace, insert the clang_format style.
+            sed -i 's/\(.*\)}/\l    "C_Cpp.clang_format_fallbackStyle": "Google"\n}/' ${SETTINGS} || \
+                { echo "Could not edit ${SETTINGS}."; exit 1; }
+        else
+            cat > ${SETTINGS} <<EOF
+{
+    "C_Cpp.clang_format_fallbackStyle": "Google"
+}
+EOF
+        fi
+    done
 fi
 
 # Discord
