@@ -1,4 +1,4 @@
-# 2022-08-15-00
+# 2022-08-15-01
 aptitude
 autoconf
 automake
@@ -24,6 +24,7 @@ imagemagick
 intel2gas
 libc++-dev
 libc++abi-dev
+libgbm1
 libglib2.0-0
 libglib2.0-dev
 libgmock-dev

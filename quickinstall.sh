@@ -159,7 +159,7 @@ install_from_deb () {
     #dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); n=split($0,deps,","); for(i=1;i<=n;i++) print deps[i] }'
     DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); gsub("\\(.*[0-9].*\\)",""); gsub(", ", " "); print}')
     echo ${DEPS}
-    echo "Elevating priveleges to install ${DEB} dependencies."
+    echo "Elevating privileges to install ${DEB} dependencies."
     echo "Enter your login password if prompted."
     sudo apt-get install -y $DEPS
     if [ $? -ne 0 ]; then
