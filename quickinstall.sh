@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Quick Install script to get an Ubuntu system up and running.
 #
@@ -57,47 +57,48 @@
 #   check for any other hypervisor.
 #
 
-# The expandPath function requires BASH. Warn for now, revise expandPath to remove the BASH dependency.
-if [ ! "$BASH_VERSION" ] ; then
-    echo "The script ($0) requires BASH. Please do not use `sh`, use `bash` instead." 1>&2
-    exit 1
-fi
-
-expandPath() {
-    # Charles Duffy https://stackoverflow.com/a/29310477/297696
-    local path
-    local -a pathElements resultPathElements
-    IFS=':' read -r -a pathElements <<<"$1"
-    : "${pathElements[@]}"
-    for path in "${pathElements[@]}"; do
-        : "$path"
-        case $path in
-        "~+"/*)
-            path=$PWD/${path#"~+/"}
-            ;;
-        "~-"/*)
-            path=$OLDPWD/${path#"~-/"}
-            ;;
-        "~"/*)
-            path=$HOME/${path#"~/"}
-            ;;
-        "~"*)
-            username=${path%%/*}
-            username=${username#"~"}
-            IFS=: read -r _ _ _ _ _ homedir _ < <(getent passwd "$username")
-            if [[ $path = */* ]]; then
-                path=${homedir}/${path#*/}
-            else
-                path=$homedir
-            fi
-            ;;
-        esac
-        resultPathElements+=( "$path" )
-    done
-    local result
-    printf -v result '%s:' "${resultPathElements[@]}"
-    printf '%s\n' "${result%:}"
-}
+# The expandPath function requires BASH.
+# if [ ! "$BASH_VERSION" ] ; then
+#     echo "The script ($0) requires BASH. Please do not use `sh`, use `bash` instead." 1>&2
+#     exit 1
+# fi
+#
+# Not using expandPath because it requires BASH. Using eval where needed.
+# expandPath() {
+#     # Charles Duffy https://stackoverflow.com/a/29310477/297696
+#     local path
+#     local -a pathElements resultPathElements
+#     IFS=':' read -r -a pathElements <<<"$1"
+#     : "${pathElements[@]}"
+#     for path in "${pathElements[@]}"; do
+#         : "$path"
+#         case $path in
+#         "~+"/*)
+#             path=$PWD/${path#"~+/"}
+#             ;;
+#         "~-"/*)
+#             path=$OLDPWD/${path#"~-/"}
+#             ;;
+#         "~"/*)
+#             path=$HOME/${path#"~/"}
+#             ;;
+#         "~"*)
+#             username=${path%%/*}
+#             username=${username#"~"}
+#             IFS=: read -r _ _ _ _ _ homedir _ < <(getent passwd "$username")
+#             if [[ $path = */* ]]; then
+#                 path=${homedir}/${path#*/}
+#             else
+#                 path=$homedir
+#             fi
+#             ;;
+#         esac
+#         resultPathElements+=( "$path" )
+#     done
+#     local result
+#     printf -v result '%s:' "${resultPathElements[@]}"
+#     printf '%s\n' "${result%:}"
+# }
 
 backup_file ()
 {
@@ -497,7 +498,8 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         done
         echo "Setting VS Code to use the Google C++ Style ~${user}/.config/Code/User/settings.json"
         SETTINGS=~${user}/.config/Code/User/settings.json
-        SETTINGSPATH=$(expandPath ${SETTINGS})
+        # Using eval like this is dangerous.
+        eval SETTINGSPATH=${SETTINGS}
         if [ -r ${SETTINGSPATH} ]; then
             backup_file ${SETTINGSPATH}
             # Find the last brace, insert the clang_format style.
