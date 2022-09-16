@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Quick Install script to get an Ubuntu system up and running.
 #
@@ -56,6 +56,12 @@
 #   determine if the host is a VirtualBox VM, VMWare VM, or not. It doesn't
 #   check for any other hypervisor.
 #
+
+# The expandPath function requires BASH. Warn for now, revise expandPath to remove the BASH dependency.
+if [ ! "$BASH_VERSION" ] ; then
+    echo "The script ($0) requires BASH. Please do not use `sh`, use `bash` instead." 1>&2
+    exit 1
+fi
 
 expandPath() {
     # Charles Duffy https://stackoverflow.com/a/29310477/297696
