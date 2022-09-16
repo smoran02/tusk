@@ -57,6 +57,42 @@
 #   check for any other hypervisor.
 #
 
+expandPath() {
+    # Charles Duffy https://stackoverflow.com/a/29310477/297696
+    local path
+    local -a pathElements resultPathElements
+    IFS=':' read -r -a pathElements <<<"$1"
+    : "${pathElements[@]}"
+    for path in "${pathElements[@]}"; do
+        : "$path"
+        case $path in
+        "~+"/*)
+            path=$PWD/${path#"~+/"}
+            ;;
+        "~-"/*)
+            path=$OLDPWD/${path#"~-/"}
+            ;;
+        "~"/*)
+            path=$HOME/${path#"~/"}
+            ;;
+        "~"*)
+            username=${path%%/*}
+            username=${username#"~"}
+            IFS=: read -r _ _ _ _ _ homedir _ < <(getent passwd "$username")
+            if [[ $path = */* ]]; then
+                path=${homedir}/${path#*/}
+            else
+                path=$homedir
+            fi
+            ;;
+        esac
+        resultPathElements+=( "$path" )
+    done
+    local result
+    printf -v result '%s:' "${resultPathElements[@]}"
+    printf '%s\n' "${result%:}"
+}
+
 backup_file ()
 {
   DATE=`date +"%Y%m%d-%S"`
@@ -455,14 +491,15 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         done
         echo "Setting VS Code to use the Google C++ Style ~${user}/.config/Code/User/settings.json"
         SETTINGS=~${user}/.config/Code/User/settings.json
-        if [ -r ${SETTINGS} ]; then
-            backup_file ${SETTINGS}
+        SETTINGSPATH=$(expandPath ${SETTINGS})
+        if [ -r ${SETTINGSPATH} ]; then
+            backup_file ${SETTINGSPATH}
             # Find the last brace, insert the clang_format style.
-            sed -i 's/\(.*\)}/\l    "C_Cpp.clang_format_fallbackStyle": "Google"\n}/' ${SETTINGS} || \
-                { echo "Could not edit ${SETTINGS}."; exit 1; }
+            sed -i 's/\(.*\)}/\l    "C_Cpp.clang_format_fallbackStyle": "Google"\n}/' ${SETTINGSPATH} || \
+                { echo "Could not edit ${SETTINGSPATH}."; exit 1; }
         else
-            mkdir -p $(dirname ${SETTINGS})
-            cat > ${SETTINGS} <<EOF
+            mkdir -p $(dirname ${SETTINGSPATH})
+            cat > ${SETTINGSPATH} <<EOF
 {
     "C_Cpp.clang_format_fallbackStyle": "Google"
 }
