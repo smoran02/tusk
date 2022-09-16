@@ -502,14 +502,22 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         eval SETTINGSPATH=${SETTINGS}
         if [ -r ${SETTINGSPATH} ]; then
             backup_file ${SETTINGSPATH}
-            # Find the last brace, insert the clang_format style.
-            sed -i 's/\(.*\)}/\l    "C_Cpp.clang_format_fallbackStyle": "Google"\n}/' ${SETTINGSPATH} || \
-                { echo "Could not edit ${SETTINGSPATH}."; exit 1; }
+            # check if it already has C_Cpp.clang_format_fallbackStyle
+            if grep C_Cpp.clang_format_fallbackStyle ${SETTINGSPATH} > /dev/null 2>&1; then
+                echo "has it"
+                sed -i '/C_Cpp.clang_format_fallbackStyle/c\    \"C_Cpp.clang_format_fallbackStyle\": \"Google\",'  ${SETTINGSPATH} 
+            else
+                echo "doesn't have it"
+                # Find the last brace, insert the clang_format style.
+                sed -i 's/\(.*\)}/\l    \"C_Cpp.clang_format_fallbackStyle\": \"Google\",\n}/' ${SETTINGSPATH} || \
+                    { echo "Could not edit ${SETTINGSPATH}."; exit 1; }
+            fi
         else
+            echo "from scratch"
             mkdir -p $(dirname ${SETTINGSPATH})
             cat > ${SETTINGSPATH} <<EOF
 {
-    "C_Cpp.clang_format_fallbackStyle": "Google"
+    "C_Cpp.clang_format_fallbackStyle": "Google",
 }
 EOF
         fi
