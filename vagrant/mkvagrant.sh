@@ -14,8 +14,8 @@ export TUSK_INSTALL_ZOOM="NO"
 
 wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh -O- | sh
 
-sudo apt update
-sudo apt install ssh
+sudo apt-get update
+sudo apt-get install ssh
 
 mkdir ~/.ssh
 wget https://raw.githubusercontent.com/hashicorp/vagrant/main/keys/vagrant.pub -O ~/.ssh/authorized_keys
@@ -35,5 +35,14 @@ echo "vagrant ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/vagrant
 # assumes that openssh server is installed
 echo "UseDNS=no" | sudo tee -a /etc/ssh/sshd_config
 
+# Build essentials for VBox additions
+sudo apt-get install -y linux-headers-$(uname -r) build-essential dkms
+
 # clean up
 rm .wget-hsts .lesshst .bash_history 
+echo "Don't forget to install Guest Additions on VBox"
+echo "1. Insert Guest Additions disc; go to Devices -> Insert Guest Additions CD Image..."
+echo "2. Run the installer"
+echo "sudo sh /media/vagrant/VBox_GAs_*/VBoxLinuxAdditions.run"
+echo "3. Package the box"
+echo "vagrant package --base my-virtual-machine"

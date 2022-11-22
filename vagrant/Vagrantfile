@@ -20,6 +20,17 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  config.vm.provider "vmware_fusion" do |vb|
+    # Customize the amount of memory on the VM
+    # You ought to be OK with 512 MB if you're not turning on the GUI
+    #vb.memory = "512"
+    if ENV.has_key?('VAGRANTGUI')
+      # If the GUI is enabled, have at least 2 GB of RAM.
+      #vb.memory = "2048"
+      vb.gui = true
+    end
+  end
+
   # Provision by executing the local copy of quickinstall.sh
   #config.vm.provision "shell", inline: <<-SHELL
     # See quickinstall.sh for all the environment variables.
