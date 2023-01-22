@@ -508,44 +508,44 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
             mkdir -p $(dirname ${SNIPPETSPATH})
         fi
         cat > ${SNIPPETSPATH} <<EOF
-        {
-        	"CPSC header": {
-        		"prefix": "cpsch",
-        		"body": [
-        			"// ${1:Firstname} ${2:Lastname}",
-        			"// CPSC 120L-${3:Section}",
-        			"// ${4:YYYY}-${5:MM}-${6:DD}",
-        			"// ${7:your_email}@csu.fullerton.edu",
-        			"// @${8:your_github}",
-        			"//",
-        			"// Lab ${9:99}-0${10:9}",
-        			"// Partners: @${11:partnergithub}",
-        			"//",
-        			"// ${12:Your-one-line-description-here}",
-        			"//",
-        			"",
-        		],
-        		"description": "Required header for CSPC C++ lab assignments."
-        	},
-        	"MS Main": {
-        		"prefix": "mai",
-        		"body": [
-        			"int main(int argc, char const *argv[]) {",
-        			"  ${1:std::cout << \"Hello World!\\n\";}",
-        			"  return 0;",
-        			"}",
-        			"",			
-        		],
-        		"description": "Google style compliant main function."
-        	},
-        	"Pound include system header": {
-        		"prefix": "inc",
-        		"body": [
-        			"#include <${1:iostream}>",
-        		],
-        		"description": "#inlude a system header file, default to iostream.",
-        	},
-        }
+{
+	"CPSC header": {
+		"prefix": "cpsch",
+		"body": [
+			"// \${1:Firstname} \${2:Lastname}",
+			"// CPSC 120L-\${3:Section}",
+			"// \${4:YYYY}-\${5:MM}-\${6:DD}",
+			"// \${7:your_email}@csu.fullerton.edu",
+			"// @\${8:your_github}",
+			"//",
+			"// Lab \${9:99}-0\${10:9}",
+			"// Partners: @\${11:partnergithub}",
+			"//",
+			"// \${12:Your-one-line-description-here}",
+			"//",
+			"",
+		],
+		"description": "Required header for CSPC C++ lab assignments."
+	},
+	"MS Main": {
+		"prefix": "mai",
+		"body": [
+			"int main(int argc, char const *argv[]) {",
+			"  \${1:std::cout << \"Hello World!\\n\";}",
+			"  return 0;",
+			"}",
+			"",			
+		],
+		"description": "Google style compliant main function."
+	},
+	"Pound include system header": {
+		"prefix": "inc",
+		"body": [
+			"#include <\${1:iostream}>",
+		],
+		"description": "#inlude a system header file, default to iostream.",
+	},
+}
 EOF
         # Configure VS Code to use the Google style
         echo "Setting VS Code to use the Google C++ Style ~${user}/.config/Code/User/settings.json"
