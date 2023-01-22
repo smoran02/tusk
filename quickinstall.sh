@@ -493,9 +493,61 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
     EXTENSIONS="ms-vscode.cpptools ms-vscode.cpptools-extension-pack ms-vscode.cpptools-themes ms-vscode.hexeditor"
     for user in $(grep "/bin/.*sh$" /etc/passwd | grep -v root | cut -f 1 -d\:); do
         sudo_warning "User: ${user}"
+        # Install VS Code extensions
         for ext in ${EXTENSIONS}; do
             sudo -l -u ${user} code --install-extension ${ext} || { echo "Failed installing ${ext} for ${user}."; exit 1; }            
         done
+        # Add C++ Snippets
+        echo "Creating a VS Code C++ Snippet file."
+        SNIPPETS=~${user}/.config/Code/User/snippets/cpp.json
+        # Using eval like this is dangerous.
+        eval SNIPPETSPATH=${SNIPPETS}
+        if [ -r ${SNIPPETSPATH} ]; then
+            backup_file ${SNIPPETSPATH}
+        else
+            mkdir $(dirname ${SNIPPETSPATH})
+        fi
+        cat > ${SNIPPETSPATH} <<EOF
+        {
+        	"CPSC header": {
+        		"prefix": "cpsch",
+        		"body": [
+        			"// ${1:Firstname} ${2:Lastname}",
+        			"// CPSC 120L-${3:Section}",
+        			"// ${4:YYYY}-${5:MM}-${6:DD}",
+        			"// ${7:your_email}@csu.fullerton.edu",
+        			"// @${8:your_github}",
+        			"//",
+        			"// Lab ${9:99}-0${10:9}",
+        			"// Partners: @${11:partnergithub}",
+        			"//",
+        			"// ${12:Your-one-line-description-here}",
+        			"//",
+        			"",
+        		],
+        		"description": "Required header for CSPC C++ lab assignments."
+        	},
+        	"MS Main": {
+        		"prefix": "mai",
+        		"body": [
+        			"int main(int argc, char const *argv[]) {",
+        			"  ${1:std::cout << \"Hello World!\\n\";}",
+        			"  return 0;",
+        			"}",
+        			"",			
+        		],
+        		"description": "Google style compliant main function."
+        	},
+        	"Pound include system header": {
+        		"prefix": "inc",
+        		"body": [
+        			"#include <${1:iostream}>",
+        		],
+        		"description": "#inlude a system header file, default to iostream.",
+        	},
+        }
+EOF
+        # Configure VS Code to use the Google style
         echo "Setting VS Code to use the Google C++ Style ~${user}/.config/Code/User/settings.json"
         SETTINGS=~${user}/.config/Code/User/settings.json
         # Using eval like this is dangerous.
