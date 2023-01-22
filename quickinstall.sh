@@ -505,7 +505,7 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         if [ -r ${SNIPPETSPATH} ]; then
             backup_file ${SNIPPETSPATH}
         else
-            mkdir $(dirname ${SNIPPETSPATH})
+            mkdir -p $(dirname ${SNIPPETSPATH})
         fi
         cat > ${SNIPPETSPATH} <<EOF
         {
