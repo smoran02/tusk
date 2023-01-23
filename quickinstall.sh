@@ -8,7 +8,7 @@
 #
 # Reminder on how to run this script on Vagrant for testing:
 # wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
-# TUSK_WARN="NO" TUSK_APT_SOURCES_OVERRIDE="YES" TUSK_APT_SOURCES_HOSTURL="http://192.167.1.67/ubuntu/" sh ./quickinstall.sh
+# TUSK_WARN="NO" TUSK_APT_SOURCES_OVERRIDE="YES" TUSK_APT_SOURCES_HOSTURL="http://192.168.1.67/ubuntu/" sh ./quickinstall.sh
 #
 # Env. Variables
 # ARCH
