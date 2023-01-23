@@ -6,6 +6,10 @@
 #           Ubuntu 22.04 LTS amd64
 #           Raspbian 10 (buster)
 #
+# Reminder on how to run this script on Vagrant for testing:
+# wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
+# TUSK_WARN="NO" TUSK_APT_SOURCES_OVERRIDE="YES" TUSK_APT_SOURCES_HOSTURL="http://192.167.1.67/ubuntu/" sh ./quickinstall.sh
+#
 # Env. Variables
 # ARCH
 #   Set to the output of `arch`
