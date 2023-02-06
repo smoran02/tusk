@@ -48,7 +48,7 @@ After clicking 'Connect' the window will close and Ubuntu Linux will attempt to 
 
 The most common problem is that you follow the steps and you do not connect to eduroam. The most likely problem is that you have entered your username and password incorrectly. Click on the gear to the right of eduroam and re-enter your information.
 
-![Note the gear to the right of eduroam.](eduroam_Screenshot_from_2023-01-23_14-59-45.png)
+![Note the gear to the right of eduroam.](images/eduroam_Screenshot_from_2023-01-23_14-59-45.png)
 
 Double check your work and double check you have entered your full email address and you have entered your password correctly. If this fails a second time, reboot your computer and try it one more time. If it does not work after rebooting your computer, ask your instructor for help.
 
