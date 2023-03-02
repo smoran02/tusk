@@ -1,7 +1,8 @@
-# 2022-08-15-01
+# 2023-03-02-00
 aptitude
 autoconf
 automake
+black
 build-essential
 cifs-utils
 clang
@@ -36,7 +37,6 @@ libsecret-1-dev
 libsecret-tools
 libsqlite3-0
 libx11-dev
-x11proto-dev
 libxslt1.1
 libxss1
 libyaml-cpp-dev
@@ -47,8 +47,14 @@ nasm
 nlohmann-json3-dev
 openssh-client
 openssh-server
+pycodestyle
+pylint
+python-setuptools
+python3
 python3-distutils
+python3-pip
 seahorse
 software-properties-common
 synaptic
 vim
+x11proto-dev
