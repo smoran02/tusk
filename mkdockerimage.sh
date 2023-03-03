@@ -4,7 +4,7 @@
 # Installs via tusk's quickinstall.sh and adds docker for the image building.
 # Output is ${TARGET}.tar.gz in the CWD.
 
-DIST="focal"
+DIST=$(lsb_release -cs)
 TARGET="tusk-${DIST}"
 
 wget https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
