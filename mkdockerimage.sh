@@ -26,7 +26,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 
 sudo debootstrap ${DIST} ${TARGET}
 
-sudo date "+%Y-%m-%d" > ${TARGET}/TUSKBUILDDATE
+date "+%Y-%m-%d" | sudo tee ${TARGET}/TUSKBUILDDATE
 
 sudo tar -C ${TARGET} -c . | sudo docker import - ${TARGET}
 
