@@ -104,6 +104,14 @@
 #     printf '%s\n' "${result%:}"
 # }
 
+# Check ID, if root, then don't use ${SUDO} and print a message
+export SUDO="sudo"
+ID=$(id -u)
+if [ ${ID} -eq 0 ]; then
+    echo "WARNING: You are running this as root."
+    export SUDO=""
+fi
+
 backup_file ()
 {
   DATE=`date +"%Y%m%d-%S"`
@@ -125,23 +133,23 @@ overide_apt_sources () {
     OG="/etc/apt/sources.list"
     BAK="${OG}.${NOW}"
     sudo_warning "Backing up ${OG} to ${BAK}"
-    sudo cp ${OG} ${BAK}
+    ${SUDO} cp ${OG} ${BAK}
     if [ $? -ne 0 ]; then
         echo "Could not backup ${OG}. Exiting."
         exit 1
     fi
     sudo_warning "Creating new ${OG}"
-    echo | sudo tee ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME} main restricted" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-updates main restricted" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME} universe" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-updates universe" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME} multiverse" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-updates multiverse" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-backports main restricted universe multiverse" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-security main restricted" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-security universe" | sudo tee -a ${OG} && \
-    echo "deb ${HOSTURL} ${CODENAME}-security multiverse" | sudo tee -a ${OG}
+    echo | ${SUDO} tee ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} main restricted" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates main restricted" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} universe" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates universe" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME} multiverse" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-updates multiverse" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-backports main restricted universe multiverse" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-security main restricted" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-security universe" | ${SUDO} tee -a ${OG} && \
+    echo "deb ${HOSTURL} ${CODENAME}-security multiverse" | ${SUDO} tee -a ${OG}
 
     if [ $? -ne 0 ]; then
         echo "Problem creating new ${OG}. Exiting."
@@ -161,7 +169,7 @@ test_dns_web () {
 }
 
 test_if_virtualmachine () {
-    PRODUCT_NAME=`sudo dmidecode -s system-product-name`
+    PRODUCT_NAME=`${SUDO} dmidecode -s system-product-name`
     if [ "${PRODUCT_NAME}X" = "VirtualBoxX" ]; then
         export TUSK_IS_VM="YES"
     elif [ "${PRODUCT_NAME}X" = "VMware Virtual PlatformX" ]; then
@@ -173,7 +181,7 @@ test_if_virtualmachine () {
 
 apt_get_update () {
     sudo_warning "Updating your package"
-    sudo apt-get -q update
+    ${SUDO} apt-get -q update
     if [ $? -ne 0 ]; then
         echo "Could not update APT indices. Exiting."
         exit 1
@@ -186,7 +194,7 @@ install_from_deb () {
     if [ -x ${DEB} ]; then
         echo "${DEB} exists, removing old file. Elevating privileges."
         echo "Enter your login password if prompted."
-        sudo rm -f ${DEB}
+        ${SUDO} rm -f ${DEB}
     fi
     echo "Fetching ${DEB}..."
     wget -q ${URL} -O ${DEB}
@@ -208,21 +216,21 @@ install_from_deb () {
     echo ${DEPS}
     echo "Elevating privileges to install ${DEB} dependencies."
     echo "Enter your login password if prompted."
-    sudo apt-get install -y $DEPS
+    ${SUDO} apt-get install -y $DEPS
     if [ $? -ne 0 ]; then
         echo "Problem installing dependencies. Exiting."
         exit 1
     fi
     echo "Elevating priveleges to install ${DEB}."
     echo "Enter your login password if prompted."
-    sudo dpkg -i ${DEB}
+    ${SUDO} dpkg -i ${DEB}
     if [ $? -ne 0 ]; then
         echo "Problem installing ${DEB}. Exiting."
         exit 1
     fi
     echo "Installed. Removing ${DEB}. Elevating privileges."
     echo "Enter your login password if prompted."
-    sudo rm -f ${DEB}
+    ${SUDO} rm -f ${DEB}
 }
 
 arch_check () {
@@ -275,7 +283,7 @@ sudo_check () {
     echo "Checking if you can execute commands with elevated privileges."
     echo "Enter your login password when prompted."
     echo "NOTE: your password will be invisible. Type it carefully and slowly, then press enter."
-    sudo echo "You can run commands as root!"
+    ${SUDO} echo "You can run commands as root!"
     if [ $? -ne 0 ]; then
         echo "Sorry, you can't run commands as root. Exiting."
         exit 1
@@ -292,7 +300,7 @@ build_install_gtest_libs () {
     cmake -DCMAKE_BUILD_TYPE=RELEASE /usr/src/googletest/googlemock
     make
     sudo_warning "Creating destination directory in ${DESTROOT}"
-    sudo mkdir -p ${DESTROOT}/lib
+    ${SUDO} mkdir -p ${DESTROOT}/lib
     if [ $? -ne 0 ]; then
         echo "Could not create destination. Exiting."
         exit 1
@@ -301,13 +309,13 @@ build_install_gtest_libs () {
     LIBS="libgtest.a libgtest_main.a libgmock.a libgmock_main.a"
     for LIB  in ${LIBS}; do
         if [ -r ./lib/${LIB} ]; then
-            sudo install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
+            ${SUDO} install -o root -g root -m 644 ./lib/${LIB} ${DESTROOT}/lib
         elif [ -r ./gtest/${LIB} ]; then
             # Raspbian has an older version that builds slightly differently.
-            sudo install -o root -g root -m 644 ./gtest/${LIB} ${DESTROOT}/lib
+            ${SUDO} install -o root -g root -m 644 ./gtest/${LIB} ${DESTROOT}/lib
         elif [ -r ./${LIB} ]; then
             # Raspbian has an older version that builds slightly differently.
-            sudo install -o root -g root -m 644 ./${LIB} ${DESTROOT}/lib
+            ${SUDO} install -o root -g root -m 644 ./${LIB} ${DESTROOT}/lib
         else
             echo "Could not locate ${LIB} in lib, gtest, or CWD. Exiting."
             exit 1
@@ -324,7 +332,7 @@ build_install_gtest_libs () {
 build_install_git_libsecret () {
     LIBSECRETGIT="/usr/share/doc/git/contrib/credential/libsecret"
     if [ -d ${LIBSECRETGIT} ]; then
-      sudo make -C ${LIBSECRETGIT}
+      ${SUDO} make -C ${LIBSECRETGIT}
       if [ $? -ne 0 ]; then
           echo "There was a problem building git's libsecret plugin. Exiting. Please report this to mshafae@fullerton.edu."
           exit 1
@@ -345,12 +353,6 @@ tusksleep () {
 #######
 
 arch_check
-
-# Check ID, make sure user is not root
-ID=$(id -u)
-if [ ${ID} -eq 0 ]; then
-    echo "WARNING: You are running this as root."
-fi
 
 distribution_check
 
@@ -402,7 +404,7 @@ else
 fi
 
 # sudo_warning "Updating your package"
-# sudo apt-get -q update
+# ${SUDO} apt-get -q update
 # if [ $? -ne 0 ]; then
 #     echo "Could not update APT indices. Exiting."
 #     exit 1
@@ -410,7 +412,7 @@ fi
 apt_get_update
 
 sudo_warning "Upgrading base OS and all installed packages."
-sudo apt-get -q -y dist-upgrade
+${SUDO} apt-get -q -y dist-upgrade
 if [ $? -ne 0 ]; then
     echo "Could not upgrade OS or installed packages. Exiting."
     exit 1
@@ -433,7 +435,7 @@ if [ "${PACKAGES}x" = "x" ]; then
     exit 1
 fi
 sudo_warning "Installing packages."
-sudo apt-get -f install -y ${PACKAGES}
+${SUDO} apt-get -f install -y ${PACKAGES}
 if [ $? -ne 0 ]; then
     echo "Could not install packages in packages.txt. Exiting."
     exit 1
@@ -451,7 +453,7 @@ if [ "${TUSK_INSTALL_ZOOM}X" = "YESX" ]; then
     echo "Installing Zoom"
     DEB="/tmp/zoom_amd64.deb"
     # Install prerequisites
-    # sudo apt-get -f install -y ibus libegl1-mesa libfontconfig1 libgl1-mesa-glx libglib2.0-0 \
+    # ${SUDO} apt-get -f install -y ibus libegl1-mesa libfontconfig1 libgl1-mesa-glx libglib2.0-0 \
     # libgstreamer-plugins-base0.10-0  libpulse0 libsm6 libsqlite3-0 libxcb-image0 libxcb-keysyms1 \
     # libxcb-randr0 libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-xinerama0 libxcb-xtest0 \
     # libxcomposite1 libxi6 libxrender1 libxslt1.1
@@ -499,7 +501,7 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         sudo_warning "User: ${user}"
         # Install VS Code extensions
         for ext in ${EXTENSIONS}; do
-            sudo -l -u ${user} code --install-extension ${ext} || { echo "Failed installing ${ext} for ${user}."; exit 1; }            
+            ${SUDO} -l -u ${user} code --install-extension ${ext} || { echo "Failed installing ${ext} for ${user}."; exit 1; }            
         done
         # Add C++ Snippets
         echo "Creating a VS Code C++ Snippet file."
@@ -621,14 +623,14 @@ if [ "${TUSK_INSTALL_DOCKER}X" = "YESX" ]; then
     if [ $? -ne 0 ]; then
       # Follows instructions given on https://docs.docker.com/engine/install/ubuntu/
       sudo_warning "Adding Docker GPG key"
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | ${SUDO} gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
       if [ $? -ne 0 ]; then
           echo "Could not add the Docker gpg key to keychain. Exiting."
           exit 1
       fi
       sudo_warning "Adding Docker repository"
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    $(lsb_release -cs) stable" | ${SUDO} tee /etc/apt/sources.list.d/docker.list > /dev/null
       if [ $? -ne 0 ]; then
           echo "Could not add the Docker repository. Exiting."
           exit 1
@@ -642,19 +644,19 @@ if [ "${TUSK_INSTALL_GITHUBCLIENT}X" = "YESX" ]; then
     dpkg-query -W -f='${Package} ${Status} ${Version}\n' gh > /dev/null 2>&1
     if [ $? -ne 0 ]; then
       sudo_warning "Adding GitHub GPG key"
-      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      ${SUDO} apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
       if [ $? -ne 0 ]; then
           echo "Could not add the GitHub gpg key. Exiting."
           exit 1
       fi
       sudo_warning "Adding GitHub repository"
-      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+      curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | ${SUDO} gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
       if [ $? -ne 0 ]; then
           echo "Could not add the GitHub key to keychain. Exiting."
           exit 1
       fi
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-      #sudo apt-add-repository https://cli.github.com/packages
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | ${SUDO} tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+      #${SUDO} apt-add-repository https://cli.github.com/packages
       if [ $? -ne 0 ]; then
           echo "Could not add the GitHub repository. Exiting."
           exit 1
@@ -682,13 +684,13 @@ fi
 #         exit 1
 #     fi
 #     sudo_warning "Moving Bazel GPG key into place"
-#     sudo mv ${BAZELDEARMOR} ${BAZELDEST}
+#     ${SUDO} mv ${BAZELDEARMOR} ${BAZELDEST}
 #     if [ $? -ne 0 ]; then
 #         echo "Error moving key into place. Exiting."
 #         exit 1
 #     fi
 #     sudo_warning "Creating Bazel apt source file"
-#     echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee  /etc/apt/sources.list.d/bazel.list
+#     echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | ${SUDO} tee  /etc/apt/sources.list.d/bazel.list
 #     if [ $? -ne 0 ]; then
 #         echo "Error creating Bazel source file. Exiting."
 #         exit 1
@@ -703,18 +705,18 @@ if [ "${TUSK_IS_VB}X" != "YESX" ]; then
         if [ $? -ne 0 ]; then
             # Virtualbox
             sudo_warning "Adding VirtualBox GPG key"
-            wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+            wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | ${SUDO} apt-key add -
             if [ $? -ne 0 ]; then
                 echo "Error adding first VirtualBox GPG key. Exiting."
                 exit 1
             fi
-            wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+            wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | ${SUDO} apt-key add -
             if [ $? -ne 0 ]; then
                 echo "Error adding second VirtualBox GPG key. Exiting."
                 exit 1
             fi
             sudo_warning "Adding VirtualBox apt source"
-            sudo apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
+            ${SUDO} apt-add-repository "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
             if [ $? -ne 0 ]; then
                 echo "Error adding adding VirtualBox repository. Exiting."
                 exit 1
@@ -729,13 +731,13 @@ if [ "${TUSK_IS_VB}X" != "YESX" ]; then
         if [ $? -ne 0 ]; then
             # Vagrant
             sudo_warning "Adding Vagrant GPG key"
-            wget -q https://apt.releases.hashicorp.com/gpg -O- | sudo apt-key add -
+            wget -q https://apt.releases.hashicorp.com/gpg -O- | ${SUDO} apt-key add -
             if [ $? -ne 0 ]; then
                 echo "Error adding Vagrant GPG key. Exiting."
                 exit 1
             fi
             sudo_warning "Adding Vagrant repository"
-            sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+            ${SUDO} apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
             if [ $? -ne 0 ]; then
                 echo "Error adding adding Vagrant repository. Exiting."
                 exit 1
@@ -748,7 +750,7 @@ fi
 if [ "${PENDING_PACKAGES}X" != "X" ]; then
     sudo_warning "Installing ${PENDING_PACKAGES}"
     apt_get_update
-    sudo apt-get install -y ${PENDING_PACKAGES}
+    ${SUDO} apt-get install -y ${PENDING_PACKAGES}
 fi
 
 # GTest and GMock libraries
@@ -759,5 +761,5 @@ build_install_git_libsecret
 
 # Post install
 sudo_warning "Cleaning up!"
-sudo apt-get -y autoremove
-sudo apt-get clean
+${SUDO} apt-get -y autoremove
+${SUDO} apt-get clean
