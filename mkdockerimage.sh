@@ -30,10 +30,12 @@ sudo debootstrap ${DIST} ${TARGET}
 
 cd ${TARGET}
 
-sudo cp /etc/apt/sources.list etc/apt
+# This only works if the versions match
+# sudo cp /etc/apt/sources.list etc/apt
+sed -i -e "s/$(lsb_release -cs)/${DIST}/g" /etc/apt/sources.list | sudo tee etc/apt/sources.list
 
 sudo apt policy debootstrap
-
+# See https://docs.docker.com/build/building/base-images/
 sudo cp ~/github/tusk/quickinstall.sh .
 # sudo wget https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
 
@@ -43,7 +45,11 @@ sudo cp ~/github/tusk/quickinstall.sh .
 
 sudo cp /etc/resolv.conf etc/
 
-sudo chroot `pwd`
+# remember you can't run a script from a chroot
+# https://stackoverflow.com/questions/51305706/shell-script-that-does-chroot-and-execute-commands-in-chroot
+sudo chroot $(pwd)
+
+apt-get update
 
 apt-get install -y wget
 
@@ -53,7 +59,7 @@ rm quickinstall.sh
 
 exit
 
-DATE=$(date "+%Y-%m-%d")
+DATE=$(date "+%Y%m%d")
 echo $DATE | sudo tee TUSKBUILDDATE
 
 cd ..
@@ -65,8 +71,11 @@ sudo docker image ls -a
 echo "Are you logged into Docker?"
 docker login
 
+# See https://github.com/moby/moby/blob/master/contrib/mkimage-alpine.sh
 docker tag ${ID} mshafae/${TARGET}:${DATE}
 docker tag ${ID} mshafae/${TARGET}:latest
 
+docker push mshafae/${TARGET}:${DATE}
+docker push mshafae/${TARGET}:latest
 # sudo docker save ${TARGET} > ${TARGET}.tar
 # gzip --best ${TARGET}.tar
