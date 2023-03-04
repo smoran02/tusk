@@ -34,8 +34,8 @@ sudo cp /etc/apt/sources.list etc/apt
 
 sudo apt policy debootstrap
 
-# sudo cp ~/github/tusk/quickinstall.sh .
-sudo wget https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
+sudo cp ~/github/tusk/quickinstall.sh .
+# sudo wget https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
 
 # can we get away with not binding these two?
 # sudo mount -o bind /dev dev/
@@ -49,6 +49,8 @@ apt-get install -y wget
 
 TUSK_WARN="NO" TUSK_INSTALL_VSCODE="NO" TUSK_INSTALL_ZOOM="NO" bash quickinstall.sh
 
+rm quickinstall.sh
+
 exit
 
 DATE=$(date "+%Y-%m-%d")
@@ -61,7 +63,7 @@ ID=$(sudo tar -C ${TARGET} -c . | sudo docker import - ${TARGET})
 sudo docker image ls -a
 
 echo "Are you logged into Docker?"
-docker login -u mshafae
+docker login
 
 docker tag ${ID} mshafae/${TARGET}:${DATE}
 docker tag ${ID} mshafae/${TARGET}:latest
