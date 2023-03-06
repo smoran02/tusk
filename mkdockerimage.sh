@@ -47,17 +47,19 @@ sudo cp /etc/resolv.conf etc/
 
 # remember you can't run a script from a chroot
 # https://stackoverflow.com/questions/51305706/shell-script-that-does-chroot-and-execute-commands-in-chroot
-sudo chroot $(pwd)
+# Or you could chroot a lot. (Not tested.)
+ROOTFS=$(PWD)
+# sudo chroot $(pwd)
 
-apt-get update
+sudo chroot $ROOTFS apt-get update
 
-apt-get install -y wget
+sudo chroot $ROOTFS apt-get install -y wget
 
-TUSK_WARN="NO" TUSK_INSTALL_VSCODE="NO" TUSK_INSTALL_ZOOM="NO" bash quickinstall.sh
+sudo chroot $ROOTFS "TUSK_WARN=\"NO\" TUSK_INSTALL_VSCODE=\"NO\" TUSK_INSTALL_ZOOM=\"NO\" bash quickinstall.sh"
 
-rm quickinstall.sh
+sudo chroot $ROOTFS rm quickinstall.sh
 
-exit
+# exit
 
 DATE=$(date "+%Y%m%d")
 echo $DATE | sudo tee TUSKBUILDDATE
