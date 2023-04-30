@@ -22,6 +22,20 @@ If you encounter problems mounting the host's filesystem in the guest, then you 
 vagrant plugin install vagrant-vbguest
 ```
 
+## Hypervisors
+
+VirtualBox is popular but it is terrible. The Vagrantfile supports VirtualBox and it is the default provider.
+
+The Vagrantfile supports [VMWare Fusion](https://www.vmware.com/products/fusion.html) as well. Add `--provider vmware_fusion` to the given commands below to use VMWare instead of VirtualBox.
+
+For example:
+
+```
+VAGRANTGUI="YES" vagrant up --provider vmware_fusion
+```
+
+The Vagrantfile has not been tested with any other hypervisors.
+
 ## Headless VM - Default
 
 ### Starting the VM for the First Time
