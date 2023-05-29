@@ -108,8 +108,9 @@
 export SUDO="sudo"
 ID=$(id -u)
 if [ ${ID} -eq 0 ]; then
-    echo "WARNING: You are running this as root."
-    export SUDO=""
+    echo "WARNING: You are running this as root. You may want to reconsider. Sleeping for 5 seconds."
+    sleep 5
+    # export SUDO=""
 fi
 
 backup_file ()
