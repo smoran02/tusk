@@ -8,7 +8,7 @@
 #
 # Reminder on how to run this script on Vagrant for testing:
 # wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
-# TUSK_WARN="NO" TUSK_APT_SOURCES_OVERRIDE="YES" TUSK_APT_SOURCES_HOSTURL="http://192.168.1.67/ubuntu/" sh ./quickinstall.sh
+# TUSK_WARN="NO" TUSK_INSTALL_ZOOM="NO" TUSK_APT_SOURCES_OVERRIDE="YES" TUSK_APT_SOURCES_HOSTURL="http://192.168.1.67/ubuntu/" sh -vx ./quickinstall.sh
 #
 # Env. Variables
 # ARCH
@@ -108,9 +108,9 @@
 export SUDO="sudo"
 ID=$(id -u)
 if [ ${ID} -eq 0 ]; then
-    echo "WARNING: You are running this as root. You may want to reconsider. Sleeping for 5 seconds."
+    echo "WARNING: You are running this as root."
+    echo "Please run this script as a regular user. Sleeping for 5 seconds."
     sleep 5
-    # export SUDO=""
 fi
 
 backup_file ()
