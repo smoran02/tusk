@@ -1,4 +1,4 @@
-# 2023-03-02-00
+# 2023-05-30-00
 aptitude
 autoconf
 automake
@@ -13,6 +13,7 @@ curl
 dirmngr
 doxygen
 enscript
+flake8
 g++
 gcc
 gdb
