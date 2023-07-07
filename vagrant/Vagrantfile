@@ -5,7 +5,8 @@ Vagrant.configure("2") do |config|
   # Bare Ubuntu desktop install
   #config.vm.box = "mshafae/ubuntu-focal-desktop"
   # Already intialized with all the quickinstall packages
-  config.vm.box = "mshafae/ubuntu-focal-tusk-desktop"
+  # config.vm.box = "mshafae/ubuntu-focal-tusk-desktop"
+  config.vm.box = "mshafae/ubuntu-jammy-tusk-desktop"
   config.vm.synced_folder "..", "/tusk"
   config.vm.synced_folder Dir.home, "/hosthome"
 
