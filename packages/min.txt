@@ -1,0 +1,10 @@
+# 2023-08-18-00
+build-essential
+clang
+clang-format
+clang-tidy
+#cmake
+#g++
+#gcc
+python3-pexpect
+libgtest-dev

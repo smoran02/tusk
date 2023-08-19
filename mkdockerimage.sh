@@ -32,7 +32,7 @@ cd ${TARGET}
 
 # This only works if the versions match
 # sudo cp /etc/apt/sources.list etc/apt
-sed -i -e "s/$(lsb_release -cs)/${DIST}/g" /etc/apt/sources.list | sudo tee etc/apt/sources.list
+sed -e "s/$(lsb_release -cs)/${DIST}/g" /etc/apt/sources.list | sudo tee etc/apt/sources.list
 
 sudo apt policy debootstrap
 # See https://docs.docker.com/build/building/base-images/
@@ -48,7 +48,7 @@ sudo cp /etc/resolv.conf etc/
 # remember you can't run a script from a chroot
 # https://stackoverflow.com/questions/51305706/shell-script-that-does-chroot-and-execute-commands-in-chroot
 # Or you could chroot a lot. (Not tested.)
-ROOTFS=$(PWD)
+ROOTFS=$(pwd)
 # sudo chroot $(pwd)
 
 sudo chroot $ROOTFS apt-get update
