@@ -526,7 +526,7 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
 			"//",
 			"",
 		],
-		"description": "Required header for CSPC C++ lab assignments."
+		"description": "Required header for CSPC 120L C++ lab assignments."
 	},
 	"MS Main": {
 		"prefix": "mai",
