@@ -497,7 +497,7 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
       install_from_deb ${URL} ${DEB}
     fi
     echo "Adding extensions for VS Code for every user with a shell."
-    EXTENSIONS="ms-vscode.cpptools ms-vscode.cpptools-extension-pack ms-vscode.cpptools-themes ms-vscode.hexeditor"
+    EXTENSIONS="ms-vscode.cpptools ms-vscode.cpptools-extension-pack ms-vscode.cpptools-themes ms-vscode.hexeditor GitHub.codespaces ms-vscode-remote.remote-containers ms-vscode.makefile-tools"
     for user in $(grep "/bin/.*sh$" /etc/passwd | grep -v root | cut -f 1 -d\:); do
         sudo_warning "User: ${user}"
         # Install VS Code extensions
