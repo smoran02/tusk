@@ -15,6 +15,7 @@ doxygen
 enscript
 flake8
 g++
+g++-12
 gcc
 gdb
 git
