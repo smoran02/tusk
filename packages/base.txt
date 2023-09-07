@@ -1,9 +1,10 @@
-# 2023-05-30-00
+# 2023-09-06-00
 aptitude
 autoconf
 automake
 black
 build-essential
+ca-certificates
 cifs-utils
 clang
 clang-format
@@ -54,6 +55,7 @@ pylint
 python-setuptools
 python3
 python3-distutils
+python3-pexpect
 python3-pip
 python3-venv
 seahorse
