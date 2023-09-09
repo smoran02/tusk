@@ -1,9 +1,10 @@
-# 2023-05-30-00
+# 2023-08-29-00
 aptitude
 autoconf
 automake
 black
 build-essential
+ca-certificates
 cifs-utils
 clang
 clang-format
@@ -15,7 +16,7 @@ doxygen
 enscript
 flake8
 g++
-g++-12
+#g++-12
 gcc
 gdb
 git
