@@ -11,4 +11,5 @@ RUN apt update \
 && apt clean all \
 && apt autoremove
 
-RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
+# RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
+RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
