@@ -14,7 +14,7 @@ for REL in ${RELEASES}; do
     ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-all  .)
     # ID=$(docker image ls | grep ${TARGET}  | awk '{print $3}')
     
-    if [ -n $ID ]; then
+    if [ $ID ]; then
         docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
         docker tag ${ID} mshafae/${CURRENTTARGET}:latest
 

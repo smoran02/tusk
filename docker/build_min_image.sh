@@ -7,10 +7,10 @@ DATE=$(date "+%Y%m%d%H%M")
 for REL in ${RELEASES}; do
     CURRENTTARGET="${TARGET}-${REL}-min"
     echo ${CURRENTTARGET}
-    ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-all  .)
+    ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-min  .)
     # ID=$(docker image ls | grep ${TARGET}  | awk '{print $3}')
 
-    if [ -n $ID ]; then
+    if [ $ID ]; then
         docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
         docker tag ${ID} mshafae/${CURRENTTARGET}:latest
 
