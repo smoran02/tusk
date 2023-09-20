@@ -9,13 +9,23 @@ fi
 
 echo $MS_GITHUB_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
-ID=$(docker image ls  mshafae/tusk-jammy-min:latest | tail +2 | awk '{print $3}')
-DATE=$(docker image ls --format "table {{.ID}} {{.Repository}} {{.Tag}}" | grep $ID | grep -v latest | awk '{print $3}')
-echo $ID
-echo $DATE
-exit 1
-docker tag ${ID} ghcr.io/mshafae/${TARGET}:${DATE}
-docker tag ${ID} ghcr.io/mshafae/${TARGET}:latest
+RELEASES="jammy lunar"
 
-docker push ghcr.io/mshafae/${TARGET}:${DATE}
-docker push ghcr.io/mshafae/${TARGET}:latest
+for REL in ${RELEASES}; do
+    TARGET="tusk-${REL}-min"
+    ID=$(docker image ls  mshafae/${TARGET}:latest | tail +2 | awk '{print $3}')
+    if [ $ID ]; then
+        DATE=$(docker image ls --format "table {{.ID}} {{.Repository}} {{.Tag}}" | grep $ID | grep -v latest | awk '{print $3}')
+        echo $ID
+        echo $DATE
+        exit 1
+        docker tag ${ID} ghcr.io/mshafae/${TARGET}:${DATE}
+        docker tag ${ID} ghcr.io/mshafae/${TARGET}:latest
+
+        docker push ghcr.io/mshafae/${TARGET}:${DATE}
+        docker push ghcr.io/mshafae/${TARGET}:latest
+    else
+        echo "Couldn't find the right ID for ${TARGET}"
+        exit 1
+    fi
+done
