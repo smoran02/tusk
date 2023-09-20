@@ -10,12 +10,17 @@ for REL in ${RELEASES}; do
     ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-all  .)
     # ID=$(docker image ls | grep ${TARGET}  | awk '{print $3}')
 
-    docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
-    docker tag ${ID} mshafae/${CURRENTTARGET}:latest
+    if [ -n $ID ]; then
+        docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
+        docker tag ${ID} mshafae/${CURRENTTARGET}:latest
 
-    docker push mshafae/${CURRENTTARGET}:${DATE}
-    docker push mshafae/${CURRENTTARGET}:latest
+        docker push mshafae/${CURRENTTARGET}:${DATE}
+        docker push mshafae/${CURRENTTARGET}:latest
 
-    echo "To Test"
-    echo "docker run -it --user tuffy ${CURRENTTARGET}"
+        echo "To Test"
+        echo "docker run -it --user tuffy ${CURRENTTARGET}"
+    else
+        echo "Trouble building the image."
+        exit 1
+    fi
 done

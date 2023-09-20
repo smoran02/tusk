@@ -4,18 +4,27 @@ RELEASES="jammy lunar"
 TARGET="tusk"
 DATE=$(date "+%Y%m%d%H%M")
 
+build_docker_image () {
+
+}
+
 for REL in ${RELEASES}; do
     CURRENTTARGET="${TARGET}-${REL}"
     echo ${CURRENTTARGET}
     ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-all  .)
     # ID=$(docker image ls | grep ${TARGET}  | awk '{print $3}')
+    
+    if [ -n $ID ]; then
+        docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
+        docker tag ${ID} mshafae/${CURRENTTARGET}:latest
 
-    docker tag ${ID} mshafae/${CURRENTTARGET}:${DATE}
-    docker tag ${ID} mshafae/${CURRENTTARGET}:latest
+        docker push mshafae/${CURRENTTARGET}:${DATE}
+        docker push mshafae/${CURRENTTARGET}:latest
 
-    docker push mshafae/${CURRENTTARGET}:${DATE}
-    docker push mshafae/${CURRENTTARGET}:latest
-
-    echo "To Test"
-    echo "docker run -it --user tuffy ${CURRENTTARGET}"
+        echo "To Test"
+        echo "docker run -it --user tuffy ${CURRENTTARGET}"
+    else
+        echo "Trouble building the image."
+        exit 1
+    fi
 done
