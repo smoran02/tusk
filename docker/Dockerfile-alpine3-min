@@ -9,6 +9,7 @@ ENV TZ="US/Pacific"
 # https://gist.github.com/mikilian/d92f9cd22803b9c61725c86391618615
 # You got to remove all the extra stuff manually.
 # https://stackoverflow.com/questions/54131066/lightweight-gcc-for-alpine
+# Clang 16 has the tools and it takes 400-600 MB
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
