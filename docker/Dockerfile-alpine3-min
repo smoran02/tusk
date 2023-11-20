@@ -22,6 +22,8 @@ RUN apk update && \
          gmock \
          gtest \
          gtest-dev \
+         graphicsmagick \
+         libgraphicsmagick++1-dev \
          git \
          ca-certificates \
          tzdata

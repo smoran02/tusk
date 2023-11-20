@@ -8,10 +8,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt update \
 && apt install -y --no-install-recommends \
-build-essential clang clang-format clang-tidy \
-python3-pexpect \
-libgmock-dev libgtest-dev \
-graphicsmagick libgraphicsmagick++1-dev \
+    build-essential clang clang-format clang-tidy \
+    python3-pexpect \
+    libgmock-dev libgtest-dev \
+    graphicsmagick libgraphicsmagick++1-dev \
 git ca-certificates \
 && apt clean all \
 && apt autoremove
