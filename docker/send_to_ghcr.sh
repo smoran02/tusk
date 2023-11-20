@@ -18,7 +18,7 @@ for REL in ${RELEASES}; do
         DATE=$(docker image ls --format "table {{.ID}} {{.Repository}} {{.Tag}}" | grep $ID | grep -v latest | awk '{print $3}')
         echo $ID
         echo $DATE
-        exit 1
+        #exit 1
         docker tag ${ID} ghcr.io/mshafae/${TARGET}:${DATE}
         docker tag ${ID} ghcr.io/mshafae/${TARGET}:latest
 
