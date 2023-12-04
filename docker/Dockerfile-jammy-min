@@ -11,8 +11,9 @@ RUN apt update \
     build-essential clang clang-format clang-tidy \
     python3-pexpect \
     libgmock-dev libgtest-dev \
+    gsfonts \
     graphicsmagick libgraphicsmagick++1-dev \
-git ca-certificates \
+    git ca-certificates \
 && apt clean all \
 && apt autoremove
 
