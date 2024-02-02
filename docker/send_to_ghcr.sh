@@ -15,7 +15,7 @@ for REL in ${RELEASES}; do
     TARGET="tusk-${REL}-min"
     ID=$(docker image ls  mshafae/${TARGET}:latest | tail +2 | awk '{print $3}')
     if [ $ID ]; then
-        DATE=$(docker image ls --format "table {{.ID}} {{.Repository}} {{.Tag}}" | grep $ID | grep -v latest | awk '{print $3}')
+	DATE=$(docker image ls --format "table {{.ID}} {{.Repository}} {{.Tag}}" | grep $ID | grep -v latest | awk '{print $3}' | head -1)
         echo $ID
         echo $DATE
         #exit 1
