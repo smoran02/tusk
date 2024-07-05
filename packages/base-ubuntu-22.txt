@@ -1,4 +1,4 @@
-# 2024-07-05-00
+# 2023-09-08-00
 aptitude
 autoconf
 automake
@@ -51,10 +51,9 @@ openssh-client
 openssh-server
 pycodestyle
 pylint
-python3-setuptools
-python3-setuptools-whl
+python-setuptools
 python3
-python3-distutils-extra
+python3-distutils
 python3-pexpect
 python3-pip
 python3-venv
