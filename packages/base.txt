@@ -25,6 +25,7 @@ gpg
 graphicsmagick
 imagemagick
 intel2gas
+liboss4-salsa-asound2
 libc++-dev
 libc++abi-dev
 libgbm1
