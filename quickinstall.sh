@@ -213,17 +213,18 @@ install_from_deb () {
     echo "Checking dependencies..."
     echo "${DEB} depends on: "
     #dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); n=split($0,deps,","); for(i=1;i<=n;i++) print deps[i] }'
+    DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / {print}')
     # DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); gsub("\\(.*[0-9].*\\)",""); gsub(", ", " "); print}')
-    DEPS=$(dpkg-deb -I ${DEB} | awk '/Depends: / {gsub("Depends: ",""); gsub(", ", " "); gsub("\| ", ""); gsub("\(>= [0-9\.:\-~a-zA-Z]+\)",""); print}')
+    # DEPS=$(dpkg-deb -I ${DEB} | awk '/Depends: / {gsub("Depends: ",""); gsub(", ", " "); gsub("\| ", ""); gsub("\(>= [0-9\.:\-~a-zA-Z]+\)",""); print}')
     echo ${DEPS}
-    echo "Elevating privileges to install ${DEB} dependencies."
-    echo "Enter your login password if prompted."
-    ${SUDO} apt-get install -y $DEPS
-    if [ $? -ne 0 ]; then
-        echo "Problem installing dependencies. Exiting."
-        exit 1
-    fi
-    echo "Elevating priveleges to install ${DEB}."
+    # echo "Elevating privileges to install ${DEB} dependencies."
+    # echo "Enter your login password if prompted."
+    # ${SUDO} apt-get install -y $DEPS
+    # if [ $? -ne 0 ]; then
+    #     echo "Problem installing dependencies. Exiting."
+    #     exit 1
+    # fi
+    echo "Elevating privileges to install ${DEB}."
     echo "Enter your login password if prompted."
     ${SUDO} dpkg -i ${DEB}
     if [ $? -ne 0 ]; then
