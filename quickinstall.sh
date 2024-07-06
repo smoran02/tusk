@@ -213,7 +213,8 @@ install_from_deb () {
     echo "Checking dependencies..."
     echo "${DEB} depends on: "
     #dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); n=split($0,deps,","); for(i=1;i<=n;i++) print deps[i] }'
-    DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); gsub("\\(.*[0-9].*\\)",""); gsub(", ", " "); print}')
+    # DEPS=$(dpkg-deb -I ${DEB}  | awk '/Depends: / { gsub("Depends: ",""); gsub("\\(.*[0-9].*\\)",""); gsub(", ", " "); print}')
+    DEPS=$(dpkg-deb -I ${DEB} | awk '/Depends: / {gsub("Depends: ",""); gsub(", ", " "); gsub("\| ", ""); gsub("\(>= [0-9\.:\-~a-zA-Z]+\)",""); print}')
     echo ${DEPS}
     echo "Elevating privileges to install ${DEB} dependencies."
     echo "Enter your login password if prompted."
