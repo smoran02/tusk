@@ -2,9 +2,7 @@
 #
 # Quick Install script to get an Ubuntu system up and running.
 #
-# Tested on Ubuntu 20.04.3 LTS amd64
-#           Ubuntu 22.04 LTS amd64
-#           Raspbian 10 (buster)
+# Tested on Ubuntu 24.04 LTS amd64
 #
 # Reminder on how to run this script on Vagrant for testing:
 # wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh
@@ -226,7 +224,7 @@ install_from_deb () {
     # fi
     echo "Elevating privileges to install ${DEB}."
     echo "Enter your login password if prompted."
-    ${SUDO} dpkg -i ${DEB}
+    ${SUDO} apt install -y ${DEB}
     if [ $? -ne 0 ]; then
         echo "Problem installing ${DEB}. Exiting."
         exit 1
@@ -518,18 +516,6 @@ if [ "${TUSK_INSTALL_VSCODE}X" = "YESX" ]; then
         fi
         cat > ${SNIPPETSPATH} <<EOF
 {
-	"CPSC header": {
-		"prefix": "cpsch",
-		"body": [
-			"// \${1:Firstname} \${2:Lastname}",
-			"// \${3:your_email}@csu.fullerton.edu",
-			"// @\${4:your_github}",
-			"// Partners: @\${5:partnergithub}",
-			"//",
-			"",
-		],
-		"description": "Required header for CSPC 120L C++ lab assignments."
-	},
 	"MS Main": {
 		"prefix": "mai",
 		"body": [
