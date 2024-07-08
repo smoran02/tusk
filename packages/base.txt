@@ -63,4 +63,5 @@ seahorse
 software-properties-common
 synaptic
 vim
+wamerican-huge
 x11proto-dev
