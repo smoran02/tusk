@@ -16,6 +16,22 @@ backup_file ()
   cp "$FILENAME" "${NEWFILENAME}"
 }
 
+make_check () {
+    export GCF_CAN_MAKE="NO"
+    if ! command -v make &> /dev/null; then
+        echo "The `make` command  could not be found"
+        export GCF_CAN_MAKE="YES"
+    fi
+}
+
+gcc_check () {
+    export GCF_CAN_GCC="NO"
+    if ! command -v gcc &> /dev/null; then
+        echo "The `gcc` command  could not be found"
+        export GCF_CAN_GCC="YES"
+    fi
+}
+
 sudo_check () {
     export GCF_CAN_SUDO="NO"
     echo "We are going to check to see if you can run commands as root."
@@ -157,7 +173,19 @@ echo "Let's write out a new git configuration."
 mkgitconfig "${GITCONFIG}" "${NAME}" "${EMAIL}"
 
 echo "Let's see if we can cache your PAT..."
+gcc_check
+make_check
 sudo_check
+
+if [ ${GCF_CAN_GCC}"x" = "NOx" ] && [ ${GCF_CAN_MAKE}"x" = "NOx" ]; then
+    echo "Double check to make sure you have installed all"
+    echo "the tools needed for your development environment."
+    echo "Run the command"
+    echo "wget -q https://raw.githubusercontent.com/mshafae/tusk/main/quickinstall.sh -O- | sh"
+    echo "to install the CPSC 120 development environment."
+    echo "Then re-run this command."
+    exit 1
+fi
 
 if [ ${GCF_CAN_SUDO}"x" = "YESx" ]; then
     echo
