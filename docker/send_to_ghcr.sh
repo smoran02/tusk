@@ -9,7 +9,7 @@ fi
 
 echo $MS_GITHUB_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
-RELEASES="jammy noble"
+RELEASES="jammy noble alpine3"
 
 for REL in ${RELEASES}; do
     TARGET="tusk-${REL}-min"

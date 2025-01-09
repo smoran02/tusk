@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-RELEASES="jammy noble"
+RELEASES="jammy noble alpine3"
 TARGET="tusk"
 DATE=$(date "+%Y%m%d%H%M")
 
