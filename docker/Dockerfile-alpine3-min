@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
    
-FROM alpine:3
+FROM alpine:3 AS base
 
 ENV LANG="C.UTF-8"
 ENV TZ="US/Pacific"
@@ -43,3 +43,6 @@ RUN cp /usr/share/zoneinfo/$TZ /etc/localtime && \
 # https://wiki.alpinelinux.org/wiki/Setting_up_a_new_user
 RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
 # RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
+
+FROM scratch
+COPY --from=base / /
