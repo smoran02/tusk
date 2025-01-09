@@ -2,7 +2,7 @@
    
 FROM alpine:3
 
-ENV LANG C.UTF-8
+ENV LANG="C.UTF-8"
 ENV TZ="US/Pacific"
 
 # Someone else's setup
@@ -10,6 +10,8 @@ ENV TZ="US/Pacific"
 # You got to remove all the extra stuff manually.
 # https://stackoverflow.com/questions/54131066/lightweight-gcc-for-alpine
 # Clang 16 has the tools and it takes 400-600 MB
+# To list installed apk packages:
+# `apk list -I | cut -f1 -d' ' | sed -e 's/-r\d\+$//'| sed -e 's/\(.*\)-/\1 /'`
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
@@ -17,14 +19,13 @@ RUN apk update && \
          clang-dev \
          clang-libs \
          clang-extra-tools \
-         g++ \
          py3-pexpect \
          gmock \
          gtest \
          gtest-dev \
-         graphicsmagick \
-         libgraphicsmagick++1-dev \
+         graphicsmagick-c++ \
          git \
+         make \
          ca-certificates \
          tzdata
 
