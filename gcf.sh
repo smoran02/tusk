@@ -137,7 +137,8 @@ mkgitconfig () {
     email = ${EMAIL}
 [core]
     pager = less
-    editor = nano
+    #editor = nano
+    editor = code --wait
 [pull]
     rebase = false
 [push]
