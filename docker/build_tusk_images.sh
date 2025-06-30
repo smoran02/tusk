@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env -S bash -vx
 #
 # Assumes you're logged into Docker's registry and GitHub's registry
 #
@@ -27,8 +27,9 @@ usage () {
 }
 
 build_docker_image () {
+    # Warning: Don't echo anything for debugging because the ID is 
+    # being returned as an echo statement at the end.
     _TARGET=$1
-    echo $_TARGET
     _ID=$(docker buildx build --quiet --tag ${_TARGET} --file ${_TARGET}.Dockerfile .)
     if [ $_ID ]; then
         echo "$_ID"
@@ -41,6 +42,8 @@ push_docker_image () {
     _TARGET=$1
     _ID=$2
     _DATE=$(date "+%Y%m%d%H%M")
+    echo "push_docker_image"
+    echo "${_TARGET} ${_ID} ${_DATE}"
     docker tag ${_ID} mshafae/${_TARGET}:${_DATE} || \
         echo "Failed docker tag ${_ID} mshafae/${_TARGET}:${_DATE}"
     docker tag ${_ID} mshafae/${_TARGET}:latest || \
@@ -62,10 +65,12 @@ push_ghcr_image () {
     _TARGET=$1
     _ID=$2
     _DATE=$3
-    docker tag ${ID} ghcr.io/mshafae/${_TARGET}:${_DATE} || \
-        echo "Failed docker tag ${ID} ghcr.io/mshafae/${_TARGET}:${_DATE}"
-    docker tag ${ID} ghcr.io/mshafae/${_TARGET}:latest || \
-        echo "Failed docker tag ${ID} ghcr.io/mshafae/${_TARGET}:latest"
+    echo "push_ghcr_image"
+    echo "${_TARGET} ${_ID} ${_DATE}"
+    docker tag ${_ID} ghcr.io/mshafae/${_TARGET}:${_DATE} || \
+        echo "Failed docker tag ${_ID} ghcr.io/mshafae/${_TARGET}:${_DATE}"
+    docker tag ${_ID} ghcr.io/mshafae/${_TARGET}:latest || \
+        echo "Failed docker tag ${_ID} ghcr.io/mshafae/${_TARGET}:latest"
 
     docker push ghcr.io/mshafae/${_TARGET}:${_DATE} || \
         echo "Failed docker push ghcr.io/mshafae/${_TARGET}:${_DATE}"
@@ -100,27 +105,27 @@ main () {
 
     for REL in ${RELEASES}; do
         TARGET="${REL}-${SIZE}-${PROJECT}"
-        echo ${TARGET}
         
         #build_docker_image ${REL} ${CURRENTTARGET} ${DATE} &
         
         echo "Building ${TARGET}"
-        ID=$(build_docker_image ${TARGET})
+        IMAGE_ID=$(build_docker_image ${TARGET})
         
-        if [ "x${ID}" = "x-1" ]; then
+        echo "Image ID ${IMAGE_ID}"
+        if [ "x${IMAGE_ID}" = "x-1" ]; then
             echo "Failed building ${TARGET}. Continuing..."
             continue
         fi
         
         if [ -z ${MS_SKIP_PUSH} ]; then
             echo "Pushing image to Docker registry"
-            push_docker_image ${TARGET} ${ID} ${DATE} || exit 1
+            push_docker_image ${TARGET} ${IMAGE_ID} ${DATE} || exit 1
 
             echo "Pushing image to GitHub registry"
-            push_ghcr_image ${TARGET} ${ID} ${DATE} || exit 1
+            push_ghcr_image ${TARGET} ${IMAGE_ID} ${DATE} || exit 1
         fi
 
-        if [ "x${ID}" != "x-1" ]; then
+        if [ "x${IMAGE_ID}" != "x-1" ]; then
             echo
             echo "To Test"
             echo "docker run -it --user tuffy ${TARGET}"
