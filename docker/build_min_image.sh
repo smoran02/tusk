@@ -7,7 +7,8 @@ DATE=$(date "+%Y%m%d%H%M")
 for REL in ${RELEASES}; do
     CURRENTTARGET="${TARGET}-${REL}-min"
     echo ${CURRENTTARGET}
-    ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-min  .)
+    ID=$(docker build -q -t ${CURRENTTARGET} -f ${REL}-big.Dockerfile  .)
+    # ID=$(docker build -q -t ${CURRENTTARGET} -f Dockerfile-${REL}-min  .)
     # ID=$(docker image ls | grep ${TARGET}  | awk '{print $3}')
 
     if [ $ID ]; then
