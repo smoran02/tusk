@@ -4,8 +4,10 @@
 #
 # build_images.sh [big | small]
 #
+# export MS_SKIP_PUSH="yes" to skip push to Docker and GitHub
+# 
 
-RELEASES="22-jammy 24-noble"
+RELEASES="22-jammy 24-noble 24-new_noble"
 PROJECT="tusk"
 
 # abort () {
@@ -104,12 +106,14 @@ main () {
             continue
         fi
         
-        echo "Pushing image to Docker registry"
-        push_docker_image ${TARGET} ${ID} ${DATE} || exit 1
+        if [ -z ${MS_SKIP_PUSH} ]; then
+            echo "Pushing image to Docker registry"
+            push_docker_image ${TARGET} ${ID} ${DATE} || exit 1
 
-        echo "Pushing image to GitHub registry"
-        push_ghcr_image ${TARGET} ${ID} ${DATE} || exit 1
-        
+            echo "Pushing image to GitHub registry"
+            push_ghcr_image ${TARGET} ${ID} ${DATE} || exit 1
+        fi
+                
         echo
         echo "To Test"
         echo "docker run -it --user tuffy ${TARGET}"
