@@ -7,7 +7,8 @@
 # export MS_SKIP_PUSH="yes" to skip push to Docker and GitHub
 # 
 
-RELEASES="22-jammy 24-noble 24-new_noble"
+# RELEASES="22-jammy 24-noble 24-new_noble"
+RELEASES="24-noble 24-new_noble"
 PROJECT="tusk"
 
 # abort () {
