@@ -8,6 +8,7 @@
 # 
 
 RELEASES="22-jammy 24-noble"
+ALPINE_RELEASES="3"
 PROJECT="tusk"
 
 # abort () {
@@ -20,8 +21,8 @@ PROJECT="tusk"
 # set -e
 
 usage () {
-    echo "build_images.sh [big | small]"
-    echo "Will build [big | small] images and push to Docker and GH registry."
+    echo "build_images.sh [big|small|alpine]"
+    echo "Will build [big|small|alpine] images and push to Docker and GH registry."
     echo "Assumes you're logged into Docker and GitHub."
 }
 
@@ -86,9 +87,13 @@ main () {
     fi
 
     SIZE=$1
-    if [ "x${SIZE}" != "xbig" -a "x${SIZE}" != "xsmall" ]; then
+    if [ "x${SIZE}" != "xbig" -a "x${SIZE}" != "xsmall" -a "x${SIZE}" != "xalpine" ]; then
         usage
         exit 1
+    fi
+
+    if [ "x${SIZE}" = "xalpine" ]; then
+        RELEASES=${ALPINE_RELEASES}
     fi
 
     DATE=$(date "+%Y%m%d%H%M")
@@ -114,11 +119,13 @@ main () {
             echo "Pushing image to GitHub registry"
             push_ghcr_image ${TARGET} ${ID} ${DATE} || exit 1
         fi
-                
-        echo
-        echo "To Test"
-        echo "docker run -it --user tuffy ${TARGET}"
-        echo
+
+        if [ "x${ID}" != "x-1" ]; then
+            echo
+            echo "To Test"
+            echo "docker run -it --user tuffy ${TARGET}"
+            echo
+        fi
     done
     exit 0
 }
