@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -vx
+#!/usr/bin/env bash
 #
 # Assumes you're logged into Docker's registry and GitHub's registry
 #
