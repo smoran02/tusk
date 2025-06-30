@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash
+#!/usr/bin/env bash
 #
 # Assumes you're logged into Docker's registry and GitHub's registry
 #
@@ -7,8 +7,7 @@
 # export MS_SKIP_PUSH="yes" to skip push to Docker and GitHub
 # 
 
-# RELEASES="22-jammy 24-noble 24-new_noble"
-RELEASES="24-noble 24-new_noble"
+RELEASES="22-jammy 24-noble"
 PROJECT="tusk"
 
 # abort () {
@@ -28,6 +27,7 @@ usage () {
 
 build_docker_image () {
     _TARGET=$1
+    echo $_TARGET
     _ID=$(docker buildx build --quiet --tag ${_TARGET} --file ${_TARGET}.Dockerfile .)
     if [ $_ID ]; then
         echo "$_ID"

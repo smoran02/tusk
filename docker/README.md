@@ -1,28 +1,67 @@
-# List images
-```bash
-docker image ls
-```
 
-# Start an interactive session
+# Working with Running Docker Containers
+## Start an interactive session
 ```bash
 docker run -it --user tuffy <image-name>
 ```
 
-# List running containers
+## List running containers
 ```bash
 docker container ls
 ```
 
-# To copy files
+## To copy files
 ```bash
 docker container cp cpsc-120-env-test <container-id>:/tmp
 ```
-# To change permissions on files copied
+
+## To change permissions on files copied
 ```bash
 docker exec -it --user root <container-id> /bin/bash
 chown -R <username>:<groupname> <folder/file>
 ```
 
+# Docker Command Line Tips
+
+## List images
+```bash
+docker image ls
+docker images
+```
+
+## Remove Build Cache
+https://docs.docker.com/reference/cli/docker/builder/prune/
+```bash
+docker builder prune
+docker builder prune --all
+```
+
+## Delete All Containers Including Its Volumes Use
+```bash
+docker rm -vf $(docker ps -aq)
+```
+
+## Delete All The Images
+```bash
+docker rmi -f $(docker images -aq)
+```
+
+## Remove All Unused Containers, Volumes, Networks And Images
+```bash
+docker system prune -a --volumes
+```
+
+## Delete Images
+https://stackoverflow.com/questions/44785585/how-can-i-delete-all-local-docker-images
+```bash
+docker image prune -a
+docker rmi $(docker images -a)
+```
+
+## Delete Containers Which Are In Exited State
+```bash
+docker rm $(docker ps -a -f status=exited -q)
+```
 What can be deleted from these packages?
 
 adduser/now 3.137ubuntu1 all [installed,local]

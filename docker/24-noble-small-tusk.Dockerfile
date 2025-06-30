@@ -24,7 +24,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # git python3-pexpect \
 # autoconf automake cmake dpkg-dev file make patch libc6-dev
 
-# Install dependencies
+# Install packages
 RUN apt-get -qq update; \
     apt-get install -qqy --no-install-recommends \
         ca-certificates \
@@ -38,7 +38,7 @@ RUN apt-get -qq update; \
 #     clang clang-format clang-tidy
 
 # Cleanup
-RUN apt clean all && apt autoremove && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 # Create Tuffy user
 # RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
