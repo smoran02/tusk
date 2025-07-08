@@ -6,7 +6,7 @@ FROM ubuntu:noble AS intermediate
 ENV LANG=C.UTF-8
 # Set timezone
 ENV TZ=PDT
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Packages based on quickinstall's base.txt from 8/24/2024
 RUN apt-get -qq update; \
@@ -26,13 +26,19 @@ RUN apt-get -qq update; \
       pylint python3 python3-distutils-extra \
       python3-pexpect python3-pip python3-setuptools \
       python3-setuptools-whl python3-venv seahorse \
-      software-properties-common vim wamerican-huge x11proto-dev
+      software-properties-common vim wamerican-huge x11proto-dev && \
+    apt-get clean all && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 # Cleanup
-RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+# RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 # Create Tuffy user
 # RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
-RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
+# RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 FROM intermediate AS final
