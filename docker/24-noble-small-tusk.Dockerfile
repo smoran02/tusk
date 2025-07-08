@@ -40,6 +40,9 @@ RUN apt-get -qq update && \
     echo $TZ > /etc/timezone && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
+# COPY tuffy-gitconfig /home/tuffy/.gitconfig
+# RUN chown tuffy:tuffy /home/tuffy/.gitconfig
+
 # Install Clang
 # RUN apt-get install -qqy --no-install-recommends \
 #     clang clang-format clang-tidy
