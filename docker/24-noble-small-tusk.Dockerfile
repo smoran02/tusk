@@ -6,7 +6,7 @@ FROM ubuntu:noble AS intermediate
 ENV LANG=C.UTF-8
 # Set timezone
 ENV TZ=PDT
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # RUN apt-get -qq update \
 # && apt-get install -qqy --no-install-recommends \
@@ -24,24 +24,31 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # git python3-pexpect \
 # autoconf automake cmake dpkg-dev file make patch libc6-dev
 
-# Install packages
-RUN apt-get -qq update; \
+# Install packages, clean up packages, remove /var/lib/apt/lists, set timezone,
+# and add Tuffy user
+RUN apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
         ca-certificates \
         git python3-pexpect \
         gsfonts graphicsmagick libgraphicsmagick++1-dev \
         make libc6-dev libgmock-dev libgtest-dev \
-        clang clang-format clang-tidy
+        clang clang-format clang-tidy && \
+    apt-get clean all && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone && \
+    useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 # Install Clang
 # RUN apt-get install -qqy --no-install-recommends \
 #     clang clang-format clang-tidy
 
 # Cleanup
-RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+# RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 # Create Tuffy user
 # RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
-RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
+# RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 FROM intermediate AS final
