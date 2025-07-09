@@ -7,6 +7,14 @@
 
 
 # Working with Running Docker Containers
+
+To use a Docker client to connect to a remote Docker server via SSH. This is the best option.
+```bash
+export DOCKER_HOST="ssh://user@[ip address]"
+```
+
+There are options to [connect directly via TCP](https://docs.docker.com/reference/cli/dockerd/#daemon-socket-option) to a Docker server.
+
 ## Start an interactive session
 ```bash
 docker run -it --user tuffy <image-name>
@@ -22,10 +30,19 @@ docker container ls
 docker container cp cpsc-120-env-test <container-id>:/tmp
 ```
 
-## To change permissions on files copied
+## To change permissions on files copied or just access the running container as a root user
 ```bash
 docker exec -it --user root <container-id> /bin/bash
 chown -R <username>:<groupname> <folder/file>
+```
+
+## Exporting a Container's Filesystem to View File Sizes 
+```bash
+CONTAINERID=<container-id>
+CONTAINERTAG=<container-tag>
+docker container export ${CONTAINERID} -o ${CONTAINERTAG}.tar
+tar tvf ${CONTAINERTAG}.tar  | awk '{print $3 " " $6}' | sort -nr | less
+
 ```
 
 # Docker Command Line Tips
