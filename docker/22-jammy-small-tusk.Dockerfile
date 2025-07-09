@@ -21,6 +21,8 @@ RUN apt-get -qq update; \
     echo $TZ > /etc/timezone && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
+COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
+
 # Cleanup
 # RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
