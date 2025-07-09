@@ -30,7 +30,7 @@ RUN apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
         ca-certificates \
         git python3-pexpect \
-        gsfonts graphicsmagick libgraphicsmagick++1-dev \
+        # gsfonts graphicsmagick libgraphicsmagick++1-dev \
         make libc6-dev libgmock-dev libgtest-dev \
         clang clang-format clang-tidy && \
     apt-get clean all && \
@@ -40,7 +40,7 @@ RUN apt-get -qq update && \
     echo $TZ > /etc/timezone && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
-# COPY tuffy-gitconfig /home/tuffy/.gitconfig
+COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
 # RUN chown tuffy:tuffy /home/tuffy/.gitconfig
 
 # Install Clang
@@ -53,5 +53,8 @@ RUN apt-get -qq update && \
 # Create Tuffy user
 # RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
 # RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
+
+FROM intermediate AS test
+ADD --chown=tuffy:tuffy cpsc-120-env-test-v1.2.tar.gz /
 
 FROM intermediate AS final
