@@ -87,6 +87,19 @@ docker rmi $(docker images -a)
 docker rm $(docker ps -a -f status=exited -q)
 ```
 
+## Remote Builds
+[Documentation](https://docs.docker.com/reference/cli/docker/buildx/build/)
+```bash
+# with Git repo
+docker -H xxx build https://github.com/docker/rootfs.git#container:docker
+
+# Tarball contexts
+docker -H xxx build http://server/context.tar.gz
+
+# Text files
+docker -H xxx build - < Dockerfile
+```
+
 # Notes
 Can we use dir caches?
 ```
