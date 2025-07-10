@@ -27,6 +27,11 @@ tar tvf base-noble.tar | awk '{print $3 " " $6}' > base-noble.toc
 
 ## Helper functions
 ```bash
+function dbuild () {
+  CONTAINERTAG=$1
+  docker buildx build --quiet --tag ${CONTAINERTAG} --file ${CONTAINERTAG}.Dockerfile .
+}
+
 function dexp () {
   CONTAINERID=$2
   CONTAINERTAG=$1
@@ -34,6 +39,7 @@ function dexp () {
 }
 
 function g () {
-  docker run -it --user tuffy $1
+  CONTAINERTAG=$1
+  docker run -it --user tuffy ${CONTAINERTAG}
 }
 ```

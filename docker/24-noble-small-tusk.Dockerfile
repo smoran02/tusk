@@ -6,23 +6,6 @@ FROM ubuntu:noble AS intermediate
 ENV LANG=C.UTF-8
 # Set timezone
 ENV TZ=PDT
-# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# RUN apt-get -qq update \
-# && apt-get install -qqy --no-install-recommends \
-    # build-essential clang clang-format clang-tidy \
-    # python3-pexpect \
-    # libgmock-dev libgtest-dev \
-    # gsfonts \
-    # graphicsmagick libgraphicsmagick++1-dev \
-    # git ca-certificates \
-# && apt clean all \
-# && apt autoremove
-
-# Started with
-# gnupg2 wget ca-certificates apt-transport-https \
-# git python3-pexpect \
-# autoconf automake cmake dpkg-dev file make patch libc6-dev
 
 # Install packages, clean up packages, remove /var/lib/apt/lists, set timezone,
 # and add Tuffy user
@@ -41,20 +24,22 @@ RUN apt-get -qq update && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
-# RUN chown tuffy:tuffy /home/tuffy/.gitconfig
-
-# Install Clang
-# RUN apt-get install -qqy --no-install-recommends \
-#     clang clang-format clang-tidy
-
-# Cleanup
-# RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
-
-# Create Tuffy user
-# RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
-# RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
 FROM intermediate AS test
-ADD --chown=tuffy:tuffy cpsc-120-env-test-v1.2.tar.gz /
+ARG MS_GITHUB_PAT
+
+ENV MS_GITHUB_PAT=${MS_GITHUB_PAT?ms_github_pat_not_set}
+ENV TESTNAME="cpsc-120-env-test"
+ENV ENVTEST_TAG="v1.2"
+
+ADD --chown=tuffy:tuffy \
+    https://$MS_GITHUB_PAT@github.com/csufcs/${TESTNAME}.git#$ENVTEST_TAG /$TESTNAME
+WORKDIR /$TESTNAME/part-1
+RUN make test
+WORKDIR /$TESTNAME/part-2
+RUN make test
+# This test requires gsfonts graphicsmagick libgraphicsmagick++1-dev packages
+# WORKDIR /$TESTNAME/part-3
+# RUN make test
 
 FROM intermediate AS final

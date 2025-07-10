@@ -100,6 +100,34 @@ docker -H xxx build http://server/context.tar.gz
 docker -H xxx build - < Dockerfile
 ```
 
+## Helper functions
+```bash
+function fdbuild () {
+  CONTAINERTAG=$1
+  docker buildx build --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --target final --tag ${CONTAINERTAG} --file ${CONTAINERTAG}.Dockerfile .
+}
+
+function tdbuild () {
+  CONTAINERTAG=$1
+  docker buildx build --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --target test --tag ${CONTAINERTAG} --file ${CONTAINERTAG}.Dockerfile .
+}
+
+function xdbuild () {
+  CONTAINERTAG=$1
+  docker buildx build --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --tag ${CONTAINERTAG} --file ${CONTAINERTAG}.Dockerfile .
+}
+
+function dbuild () {
+  CONTAINERTAG=$1
+  docker buildx build --quiet --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --tag ${CONTAINERTAG} --file ${CONTAINERTAG}.Dockerfile .
+}
+
+function g () {
+  CONTAINERTAG=$1
+  docker run -it --user tuffy ${CONTAINERTAG}
+}
+```
+
 # Notes
 Can we use dir caches?
 ```

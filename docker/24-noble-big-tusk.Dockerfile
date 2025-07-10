@@ -6,27 +6,16 @@ FROM ubuntu:noble AS intermediate
 ENV LANG=C.UTF-8
 # Set timezone
 ENV TZ=PDT
-# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Packages based on quickinstall's base.txt from 8/24/2024
-RUN apt-get -qq update; \
+# Install packages, clean up packages, remove /var/lib/apt/lists, set timezone,
+# and add Tuffy user
+RUN apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
-      aptitude autoconf automake black build-essential \
-      ca-certificates clang clang-format clang-tidy \
-      cmake curl dirmngr doxygen enscript flake8 \
-      g++ gcc gdb git glibc-doc gnupg gpg \
-      graphicsmagick imagemagick intel2gas libasound2t64 \
-      libc++-dev libc++abi-dev libgbm1 libglib2.0-0 \
-      libglib2.0-dev libgmock-dev libgraphicsmagick++1-dev \
-      libgtest-dev libheif-examples libreadline-dev \
-      libsecret-1-dev libsecret-tools libsqlite3-0 \
-      libx11-dev libxslt1.1 libxss1 libyaml-cpp-dev \
-      lldb manpages-posix manpages-posix-dev nasm \
-      nlohmann-json3-dev openssh-client pycodestyle \
-      pylint python3 python3-distutils-extra \
-      python3-pexpect python3-pip python3-setuptools \
-      python3-setuptools-whl python3-venv seahorse \
-      software-properties-common vim wamerican-huge x11proto-dev && \
+        ca-certificates \
+        git python3-pexpect \
+        gsfonts graphicsmagick libgraphicsmagick++1-dev \
+        make libc6-dev libgmock-dev libgtest-dev \
+        clang clang-format clang-tidy && \
     apt-get clean all && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* && \
@@ -36,11 +25,23 @@ RUN apt-get -qq update; \
 
 COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
 
-# Cleanup
-# RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
 
-# Create Tuffy user
-# RUN adduser --shell /usr/bin/bash --disabled-password --gecos "Tuffy Titan" tuffy
-# RUN useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
+FROM intermediate AS test
+ARG MS_GITHUB_PAT
+
+ENV MS_GITHUB_PAT=${MS_GITHUB_PAT?ms_github_pat_not_set}
+ENV TESTNAME="cpsc-120-env-test"
+ENV ENVTEST_TAG="v1.2"
+
+ADD --chown=tuffy:tuffy \
+    https://$MS_GITHUB_PAT@github.com/csufcs/${TESTNAME}.git#$ENVTEST_TAG /$TESTNAME
+WORKDIR /$TESTNAME/part-1
+RUN make test
+WORKDIR /$TESTNAME/part-2
+RUN make test
+# This test requires gsfonts graphicsmagick libgraphicsmagick++1-dev packages
+WORKDIR /$TESTNAME/part-3
+RUN make test
 
 FROM intermediate AS final

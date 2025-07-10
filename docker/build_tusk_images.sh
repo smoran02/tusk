@@ -30,7 +30,7 @@ build_docker_image () {
     # Warning: Don't echo anything for debugging because the ID is 
     # being returned as an echo statement at the end.
     _TARGET=$1
-    _ID=$(docker buildx build --quiet --tag ${_TARGET} --file ${_TARGET}.Dockerfile .)
+    _ID=$(docker buildx build --quiet --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --target final --tag ${_TARGET} --file ${_TARGET}.Dockerfile .)
     if [ $_ID ]; then
         echo "$_ID"
     else
@@ -85,12 +85,18 @@ main () {
     #     exit 1
     # fi
     if [ $# -lt 1 ]; then
-        echo "Not enough arguments. Specify big or small."
+        echo "Not enough arguments. Specify big, small, or alpine."
         echo $#
         usage
         exit 1
     fi
 
+    if [ -z "${MS_GITHUB_PAT}" ]; then
+        echo "Must have GitHub PAT set in MS_GITHUB_PAT."
+        usage
+        exit 1
+    fi
+    
     SIZE=$1
     if [ "x${SIZE}" != "xbig" -a "x${SIZE}" != "xsmall" -a "x${SIZE}" != "xalpine" ]; then
         usage
