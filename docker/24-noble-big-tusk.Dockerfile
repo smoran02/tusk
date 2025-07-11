@@ -2,6 +2,11 @@
    
 FROM ubuntu:noble AS intermediate
 
+LABEL org.opencontainers.image.authors="Michael Shafae <mshafae@fullerton.edu>"
+LABEL org.opencontainers.image.title="24-noble-big-tusk"
+LABEL org.opencontainers.image.source="https://github.com/mshafae/tusk"
+LABEL org.opencontainers.image.description="A development container based on Ubuntu 24 (Noble) with clang/LLVM for Makefile based C++ projects; includes an unprivileged user 'tuffy' with git configured for command line usage. The 'big' image includes gsfonts and GraphicsMagick. Localized to C.UTF-8 and set in PDT timezone."
+
 # Set locale
 ENV LANG=C.UTF-8
 # Set timezone
@@ -9,7 +14,10 @@ ENV TZ=PDT
 
 # Install packages, clean up packages, remove /var/lib/apt/lists, set timezone,
 # and add Tuffy user
-RUN apt-get -qq update && \
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
         ca-certificates \
         git python3-pexpect \
@@ -22,8 +30,6 @@ RUN apt-get -qq update && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
-
-COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
 
 COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
 
