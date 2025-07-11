@@ -34,7 +34,7 @@ ENV ENVTEST_TAG="v1.2"
 
 ADD --chown=tuffy:tuffy \
     https://$MS_GITHUB_PAT@github.com/csufcs/${TESTNAME}.git#$ENVTEST_TAG /$TESTNAME
-# WORKDIR /%TESTNAME
+# WORKDIR /$TESTNAME
 # RUN ./git-test.sh
 WORKDIR /$TESTNAME/part-1
 RUN make test
