@@ -26,6 +26,12 @@ usage () {
     echo "Assumes you're logged into Docker and GitHub."
 }
 
+# Add a function or parametrize to test the docker image
+test_docker_image () {
+    _TARGET=$1
+    docker buildx build --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --target test --tag test-${_TARGET} --file ${_TARGET}.Dockerfile . || exit 1
+}
+
 build_docker_image () {
     # Warning: Don't echo anything for debugging because the ID is 
     # being returned as an echo statement at the end.
@@ -78,12 +84,50 @@ push_ghcr_image () {
         echo "Failed docker push ghcr.io/mshafae/${_TARGET}:latest"
 }
 
+get_latest_ubuntu_tag () {
+    RELEASE=$(echo $1 | cut -f 2 -d\-)
+    wget -q -O - "https://hub.docker.com/v2/namespaces/library/repositories/ubuntu/tags?page_size=100" | grep -o '"name": *"[^"]*' | grep -oP "${RELEASE}-\d{8}" | sort -r | head -1
+}
+
+get_latest_mshafae_tag () {
+    IMAGE=$1
+    wget -q -O - "https://hub.docker.com/v2/namespaces/mshafae/repositories/${IMAGE}/tags?page_size=100" | grep -o '"name": *"[^"]*' | grep -oP "\d{12}" | sort -r | head -1
+}
+
 main () {
     # Not used - assumes you're logged into Docker and GitHub
     # if [ "${MS_GITHUB_PAT}x" = "x" ]; then
     #     echo "You need to set MS_GITHUB_PAT with your GH PAT to continue."
     #     exit 1
     # fi
+    LONGOPTS=cron,dryrun
+    OPTIONS=c,n
+    PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@") || exit 2
+    eval set -- "$PARSED"
+    CRON="no"
+    DRYRUN="no"
+    while true; do
+        case "$1" in
+            -c|--cron)
+                CRON="yes"
+                shift
+                ;;
+            -n|--dryrun)
+                DRYRUN="yes"
+                shift
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "Programming error"
+                exit 1
+                ;;
+        esac
+    done
+
+
     if [ $# -lt 1 ]; then
         echo "Not enough arguments. Specify big, small, or alpine."
         echo $#
@@ -109,9 +153,23 @@ main () {
 
     DATE=$(date "+%Y%m%d%H%M")
 
+
     for REL in ${RELEASES}; do
         TARGET="${REL}-${SIZE}-${PROJECT}"
         
+        if [ "x"${CRON} = "xyes" ]; then
+            MS_TAG=$(get_latest_mshafae_tag ${TARGET})
+            UBUNTU_TAG=$(get_latest_ubuntu_tag ${REL})
+            UBUNTU_DATE=$(echo ${UBUNTU_TAG} | cut -f 2 -d\-)
+            # Remove last four characters
+            MS_SECS=$(date -d ${MS_TAG::-4} +%s)
+            UBUNTU_SECS=$(date -d ${UBUNTU_DATE} +%s)
+            if [ ${UBUNTU_SECS} -lt ${MS_SECS} ]; then
+                echo "${UBUNTU_TAG} < ${MS_TAG}, skipping ${TARGET}"
+                continue
+            fi
+        fi
+
         #build_docker_image ${REL} ${CURRENTTARGET} ${DATE} &
         
         if [ ! -r ${TARGET}.Dockerfile ]; then
@@ -119,6 +177,9 @@ main () {
             continue
         fi
 
+        echo "Testing ${TARGET}"
+        test_docker_image ${TARGET}
+        
         echo "Building ${TARGET}"
         IMAGE_ID=$(build_docker_image ${TARGET})
         
@@ -128,7 +189,7 @@ main () {
             continue
         fi
         
-        if [ -z ${MS_SKIP_PUSH} ]; then
+        if [ -z ${MS_SKIP_PUSH} -a "x"${DRYRUN} = "xno" ]; then
             echo "Pushing image to Docker registry"
             push_docker_image ${TARGET} ${IMAGE_ID} ${DATE} || exit 1
 
