@@ -7,6 +7,7 @@
 # export MS_SKIP_PUSH="yes" to skip push to Docker and GitHub
 # 
 
+PROJECT_ROOT="/home/mshafae/github/tusk/docker"
 RELEASES="22-jammy 24-noble"
 ALPINE_RELEASES="3"
 PROJECT="tusk"
@@ -146,6 +147,13 @@ main () {
         fi
     fi
     
+    if [ -d ${PROJECT_ROOT} ]; then
+        pushd ${PROJECT_ROOT} >& /dev/null
+    else
+        echo "Missing ${PROJECT_ROOT}"
+        exit 1
+    fi
+
     SIZE=$1
     if [ "x${SIZE}" != "xbig" -a "x${SIZE}" != "xsmall" -a "x${SIZE}" != "xalpine" ]; then
         usage
@@ -157,7 +165,6 @@ main () {
     fi
 
     DATE=$(date "+%Y%m%d%H%M")
-
 
     for REL in ${RELEASES}; do
         TARGET="${REL}-${SIZE}-${PROJECT}"
@@ -210,6 +217,7 @@ main () {
             echo
         fi
     done
+    popd >& /dev/null
     exit 0
 }
 
