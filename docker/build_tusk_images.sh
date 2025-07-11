@@ -26,7 +26,6 @@ usage () {
     echo "Assumes you're logged into Docker and GitHub."
 }
 
-# Add a function or parametrize to test the docker image
 test_docker_image () {
     _TARGET=$1
     docker buildx build --build-arg MS_GITHUB_PAT=${MS_GITHUB_PAT} --target test --tag test-${_TARGET} --file ${_TARGET}.Dockerfile . || exit 1
@@ -156,7 +155,15 @@ main () {
 
     for REL in ${RELEASES}; do
         TARGET="${REL}-${SIZE}-${PROJECT}"
+        echo "Starting to work on ${TARGET}"
+
+        #build_docker_image ${REL} ${CURRENTTARGET} ${DATE} &
         
+        if [ ! -r ${TARGET}.Dockerfile ]; then
+            echo "Skipping ${TARGET}, no Dockerfile."
+            continue
+        fi
+
         if [ "x"${CRON} = "xyes" ]; then
             MS_TAG=$(get_latest_mshafae_tag ${TARGET})
             UBUNTU_TAG=$(get_latest_ubuntu_tag ${REL})
@@ -168,13 +175,6 @@ main () {
                 echo "${UBUNTU_TAG} < ${MS_TAG}, skipping ${TARGET}"
                 continue
             fi
-        fi
-
-        #build_docker_image ${REL} ${CURRENTTARGET} ${DATE} &
-        
-        if [ ! -r ${TARGET}.Dockerfile ]; then
-            echo "Skipping ${TARGET}, no Dockerfile."
-            continue
         fi
 
         echo "Testing ${TARGET}"
