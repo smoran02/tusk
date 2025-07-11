@@ -31,7 +31,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
     echo $TZ > /etc/timezone && \
     useradd --comment "Tuffy Titan" --create-home --shell /bin/bash tuffy
 
-COPY --chown=tuffy:tuffy tuffy-gitconfig /home/tuffy/.gitconfig
+ADD --chown=tuffy:tuffy https://raw.githubusercontent.com/mshafae/tusk/refs/heads/main/docker/tuffy-gitconfig /home/tuffy/.gitconfig
 
 FROM intermediate AS test
 ARG MS_GITHUB_PAT
