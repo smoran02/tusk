@@ -202,7 +202,7 @@ main () {
             continue
         fi
         
-        if [ -z ${MS_SKIP_PUSH} -a "x"${DRYRUN} = "xno" ]; then
+        if [ "x"${MS_SKIP_PUSH} = "x" -a "x"${DRYRUN} = "xno" ]; then
             echo "Pushing image to Docker registry"
             push_docker_image ${TARGET} ${IMAGE_ID} ${DATE} || exit 1
 
