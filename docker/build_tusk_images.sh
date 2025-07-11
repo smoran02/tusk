@@ -114,6 +114,11 @@ main () {
         
         #build_docker_image ${REL} ${CURRENTTARGET} ${DATE} &
         
+        if [ ! -r ${TARGET}.Dockerfile ]; then
+            echo "Skipping ${TARGET}, no Dockerfile."
+            continue
+        fi
+
         echo "Building ${TARGET}"
         IMAGE_ID=$(build_docker_image ${TARGET})
         
