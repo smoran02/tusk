@@ -100,12 +100,13 @@ main () {
     #     echo "You need to set MS_GITHUB_PAT with your GH PAT to continue."
     #     exit 1
     # fi
-    LONGOPTS=cron,dryrun
-    OPTIONS=c,n
+    LONGOPTS=cron,dryrun,notest
+    OPTIONS=c,n,x
     PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@") || exit 2
     eval set -- "$PARSED"
     CRON="no"
     DRYRUN="no"
+    NOTEST="no"
     while true; do
         case "$1" in
             -c|--cron)
@@ -114,6 +115,10 @@ main () {
                 ;;
             -n|--dryrun)
                 DRYRUN="yes"
+                shift
+                ;;
+            -x|--notest)
+                NOTEST="yes"
                 shift
                 ;;
             --)
@@ -190,8 +195,10 @@ main () {
             fi
         fi
 
-        echo "Testing ${TARGET}"
-        test_docker_image ${TARGET}
+        if [ "x"${NOTEST} = "xno" ]; then
+            echo "Testing ${TARGET}"
+            test_docker_image ${TARGET}
+        fi
         
         echo "Building ${TARGET}"
         IMAGE_ID=$(build_docker_image ${TARGET})
@@ -212,7 +219,7 @@ main () {
 
         if [ "x${IMAGE_ID}" != "x-1" ]; then
             echo
-            echo "To Test"
+            echo "To run an interactive shell:"
             echo "docker run -it --user tuffy ${TARGET}"
             echo
         fi

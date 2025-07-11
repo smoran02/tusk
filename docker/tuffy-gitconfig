@@ -1,5 +1,5 @@
 [init]
 	defaultBranch = main
 [user]
-	email = tuffy.titan[docker]@csu.noreply.fullerton.edu
-	name = Tuffy Titan[docker]
+	email = tuffy.titan[devcontainer]@csu.noreply.fullerton.edu
+	name = Tuffy Titan[devcontainer]

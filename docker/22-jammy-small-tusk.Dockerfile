@@ -2,13 +2,22 @@
    
 FROM ubuntu:jammy AS intermediate
 
+LABEL org.opencontainers.image.authors="Michael Shafae <mshafae@fullerton.edu>"
+LABEL org.opencontainers.image.title="22-jammy-small-tusk"
+LABEL org.opencontainers.image.source="https://github.com/mshafae/tusk"
+LABEL org.opencontainers.image.description="A development container based on Ubuntu 22 (Jammy) with clang/LLVM for Makefile based C++ projects; includes an unprivileged 'tuffy' with git configured for command line usage. Localized to C.UTF-8 and set in PDT timezone."
+
 # Set locale
 ENV LANG=C.UTF-8
 # Set timezone
 ENV TZ=PDT
 
-# Install packages
-RUN apt-get -qq update; \
+# Install packages, clean up packages, remove /var/lib/apt/lists, set timezone,
+# and add Tuffy user
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    apt-get -qq update && \
     apt-get install -qqy --no-install-recommends \
         ca-certificates \
         git python3-pexpect \
