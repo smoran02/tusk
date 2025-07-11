@@ -5,6 +5,47 @@
  * [GitHub Packages](https://github.com/mshafae?tab=packages)
  * [Docker Hub](https://hub.docker.com/repositories/mshafae)
 
+# Dockerfile Notes
+
+## Buildkit
+
+Use [Buildkit](https://docs.docker.com/build/buildkit/). 
+
+```bash
+# Turn off buildkit
+DOCKER_BUILDKIT=0
+# Turn on buildkit
+DOCKER_BUILDKIT=1
+``` 
+
+## Directory Cache
+
+Speed up builds by caching directories. See documentation in [buildkit](https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/reference.md#run---mounttypecache) and [DockerDocs](https://docs.docker.com/build/cache/optimize/#use-cache-mounts).
+
+Example Dockerfile for pip and Python from [Docker: Up & Running, 3rd Edition](https://learning.oreilly.com/library/view/docker-up/9781098131814/).
+```dockerfile
+# syntax=docker/dockerfile:1
+FROM python:3.9.15-slim-bullseye
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache pip install -r requirements.txt
+WORKDIR /app/mastermind
+CMD ["python", "mastermind.py"]
+```
+
+Example Dockerfile for apt-get from [StackOverflow](https://stackoverflow.com/questions/66808788/docker-can-you-cache-apt-get-package-installs).
+```dockerfile
+# syntax=docker/dockerfile:1.3.1
+FROM ubuntu
+
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean \
+    && apt-get update \
+    && apt-get -y --no-install-recommends install \
+        ruby ruby-dev gcc
+```
 
 # Working with Running Docker Containers
 
