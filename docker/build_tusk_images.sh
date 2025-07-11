@@ -135,9 +135,15 @@ main () {
     fi
 
     if [ -z "${MS_GITHUB_PAT}" ]; then
-        echo "Must have GitHub PAT set in MS_GITHUB_PAT."
-        usage
-        exit 1
+        PATFILE="/home/mshafae/.gh_automation"
+        if [ -r $PATFILE ]; then
+            echo "Using automation PAT."
+            source $PATFILE
+        else
+            echo "Must have GitHub PAT set in MS_GITHUB_PAT."
+            usage
+            exit 1
+        fi
     fi
     
     SIZE=$1
