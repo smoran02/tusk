@@ -3,3 +3,5 @@
 [user]
 	email = tuffy.titan[devcontainer]@csu.noreply.fullerton.edu
 	name = Tuffy Titan[devcontainer]
+[pull]
+  rebase = false
