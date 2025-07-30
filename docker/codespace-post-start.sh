@@ -13,7 +13,12 @@ if [ -z ${MS_GIT_USER_EMAIL} ]; then
   exit 1
 fi
 
-git config --global --replace-all user.name "${MS_GIT_USER_NAME}"
-git config --global --replace-all user.email "${MS_GIT_USER_EMAIL}"
-# git config --global pull.rebase false
+GIT_SCOPES="global local"
+for SCOPE in ${GIT_SCOPES}; do
+  git config --${SCOPE} --replace-all user.name "${MS_GIT_USER_NAME} [tusk devcontainer]"
+  git config --${SCOPE} --replace-all user.email "${MS_GIT_USER_EMAIL}"
+  git config --${SCOPE} pull.rebase false
+  git config --${SCOPE} --replace-all commit.gpgsign false
+done
+
 exit 0

@@ -1,7 +1,10 @@
+# Deprecated, using devcontainer's postStartCommand to set user.name
+#[user]
+#  email = tuffy.titan[devcontainer]@csu.noreply.fullerton.edu
+#  name = Tuffy Titan[devcontainer]
 [init]
-	defaultBranch = main
-[user]
-	email = tuffy.titan[devcontainer]@csu.noreply.fullerton.edu
-	name = Tuffy Titan[devcontainer]
+  defaultBranch = main
 [pull]
   rebase = false
+[commit]
+  gpgsign = false
