@@ -33,6 +33,8 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
 
 ADD --chown=tuffy:tuffy https://raw.githubusercontent.com/mshafae/tusk/refs/heads/main/docker/tuffy-gitconfig /home/tuffy/.gitconfig
 
+ADD --chown=tuffy:tuffy --chmod=755 https://raw.githubusercontent.com/mshafae/tusk/refs/heads/main/docker/codespace-post-start.sh /home/tuffy/.codespace-post-start.sh
+
 FROM intermediate AS test
 ARG MS_GITHUB_PAT
 
