@@ -553,6 +553,13 @@ EOF
                 sed -i 's/\(.*\)}/\l    \"C_Cpp.clang_format_fallbackStyle\": \"Google\",\n}/' ${SETTINGSPATH} || \
                     { echo "Could not edit ${SETTINGSPATH}."; exit 1; }
             fi
+            # edit files.trimTrailingWhitespace to avoid formatting issues
+            if grep files.trimTrailingWhitespace ${SETTINGSPATH} > /dev/null 2>&1; then
+                sed -i '/files.trimTrailingWhitespace/c\    \"files.trimTrailingWhitespace\": true,' ${SETTINGSPATH}
+            else
+                sed -i 's/}/    \"files.trimTrailingWhitespace\": true,\n}/' ${SETTINGSPATH} || \
+                    { echo "Could not edit ${SETTINGSPATH}."; exit 1; }
+            fi
         else
             echo "from scratch"
             mkdir -p $(dirname ${SETTINGSPATH})
